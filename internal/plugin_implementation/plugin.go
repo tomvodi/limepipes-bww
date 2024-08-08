@@ -16,43 +16,52 @@ type plug struct {
 	fileSplitter interfaces.BwwFileByTuneSplitter
 }
 
-func (p *plug) PluginInfo() (*messages.PluginInfoResponse, error) {
-	return &messages.PluginInfoResponse{
-		Name:        "BWW Plugin",
-		Description: "Import Bagpipe Music Writer and Bagpipe Player files.",
-		Type:        messages.PluginType_IN,
-		FileTypes:   []string{".bww", ".bmw"},
-	}, nil
-}
-
-func (p *plug) ImportFile(filePath string) (*messages.ImportFileResponse, error) {
+func (p *plug) ImportLocalFile(filePath string) (*messages.ImportFileResponse, error) {
 	fileData, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
 	log.Info().Msgf("importing file %s", filePath)
-	var muModel music_model.MusicModel
-	muModel, err = p.parser.ParseBwwData(fileData)
+
+	msg, err := p.importTunesFromData(fileData)
 	if err != nil {
-		return nil, fmt.Errorf("failed parsing file %s: %v", filePath, err)
+		return nil, fmt.Errorf("failed importing tune file %s: %v", filePath, err)
 	}
 
-	log.Trace().Msgf("successfully parsed %d tunes from file %s",
+	return msg, nil
+}
+
+func (p *plug) Import(fileData []byte) (*messages.ImportFileResponse, error) {
+	msg, err := p.importTunesFromData(fileData)
+	if err != nil {
+		return nil, fmt.Errorf("failed importing file data: %v", err)
+	}
+
+	return msg, nil
+}
+
+func (p *plug) importTunesFromData(tunesData []byte) (*messages.ImportFileResponse, error) {
+	var muModel music_model.MusicModel
+	muModel, err := p.parser.ParseBwwData(tunesData)
+	if err != nil {
+		return nil, fmt.Errorf("failed parsing file: %v", err)
+	}
+
+	log.Trace().Msgf("successfully parsed %d tunes",
 		len(muModel),
-		filePath,
 	)
 
 	p.tuneFixer.Fix(muModel)
 
-	bwwFileTuneData, err := p.fileSplitter.SplitFileData(fileData)
+	bwwFileTuneData, err := p.fileSplitter.SplitFileData(tunesData)
 	if err != nil {
-		msg := fmt.Sprintf("failed splitting file %s by tunes: %s", filePath, err.Error())
+		msg := fmt.Sprintf("failed splitting data by tunes: %s", err.Error())
 		return nil, fmt.Errorf(msg)
 	}
 
 	if len(bwwFileTuneData.TuneTitles()) != len(muModel) {
-		log.Warn().Msgf("splited bww file and music model don't have the same amount of tunes: %s",
-			filePath)
+		log.Error().Msgf("splited bww file and music model don't have the same amount of tunes."+
+			" Music model: %d, BWW file: %d", len(muModel), len(bwwFileTuneData.TuneTitles()))
 	}
 
 	parsedTunes := make([]*messages.ImportedTune, len(muModel))
@@ -70,6 +79,15 @@ func (p *plug) ImportFile(filePath string) (*messages.ImportFileResponse, error)
 				TuneFileData: nil,
 			},
 		},
+	}, nil
+}
+
+func (p *plug) PluginInfo() (*messages.PluginInfoResponse, error) {
+	return &messages.PluginInfoResponse{
+		Name:        "BWW Plugin",
+		Description: "Import Bagpipe Music Writer and Bagpipe Player files.",
+		Type:        messages.PluginType_IN,
+		FileTypes:   []string{".bww", ".bmw"},
 	}, nil
 }
 
