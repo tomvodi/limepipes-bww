@@ -3,9 +3,9 @@ package plugin_implementation
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
 	plugininterfaces "github.com/tomvodi/limepipes-plugin-api/plugin/v1/interfaces"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/common/music_model"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 	"os"
 )
@@ -41,7 +41,7 @@ func (p *plug) Import(fileData []byte) (*messages.ImportFileResponse, error) {
 }
 
 func (p *plug) importTunesFromData(tunesData []byte) (*messages.ImportFileResponse, error) {
-	var muModel music_model.MusicModel
+	var muModel musicmodel.MusicModel
 	muModel, err := p.parser.ParseBwwData(tunesData)
 	if err != nil {
 		return nil, fmt.Errorf("failed parsing file: %v", err)

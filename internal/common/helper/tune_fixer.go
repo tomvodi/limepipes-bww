@@ -1,8 +1,8 @@
 package helper
 
 import (
+	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/common/music_model"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 
 	"golang.org/x/text/cases"
@@ -14,7 +14,7 @@ import (
 type tuneFix struct {
 }
 
-func (t *tuneFix) Fix(muMo music_model.MusicModel) {
+func (t *tuneFix) Fix(muMo musicmodel.MusicModel) {
 	for _, tune := range muMo {
 		fixComposerArranger(tune)
 		fixComposerTrad(tune)

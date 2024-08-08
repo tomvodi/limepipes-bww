@@ -4,9 +4,9 @@ import (
 	"github.com/goccy/go-yaml"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/helper"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/measure"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/common/helper"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/common/music_model"
+	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/utils"
 	"io"
@@ -23,15 +23,15 @@ func dataFromFile(filePath string) []byte {
 	return data
 }
 
-func exportToYaml(muMo music_model.MusicModel, filePath string) {
+func exportToYaml(muMo musicmodel.MusicModel, filePath string) {
 	data, err := yaml.Marshal(muMo)
 	Expect(err).ShouldNot(HaveOccurred())
 	err = os.WriteFile(filePath, data, 0664)
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-func importFromYaml(filePath string) music_model.MusicModel {
-	muMo := make(music_model.MusicModel, 0)
+func importFromYaml(filePath string) musicmodel.MusicModel {
+	muMo := make(musicmodel.MusicModel, 0)
 	fileData, err := os.ReadFile(filePath)
 	Expect(err).ShouldNot(HaveOccurred())
 	err = yaml.Unmarshal(fileData, &muMo)
@@ -40,7 +40,7 @@ func importFromYaml(filePath string) music_model.MusicModel {
 	return muMo
 }
 
-func nilAllMeasureMessages(muMo music_model.MusicModel) {
+func nilAllMeasureMessages(muMo musicmodel.MusicModel) {
 	for _, tune := range muMo {
 		for _, measure := range tune.Measures {
 			measure.ImportMessages = nil
@@ -52,8 +52,8 @@ var _ = Describe("BWW Parser", func() {
 	utils.SetupConsoleLogger()
 	var err error
 	var parser interfaces.BwwParser
-	var musicTunesBww music_model.MusicModel
-	var musicTunesExpect music_model.MusicModel
+	var musicTunesBww musicmodel.MusicModel
+	var musicTunesExpect musicmodel.MusicModel
 
 	BeforeEach(func() {
 		parser = NewBwwParser()
@@ -98,7 +98,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed all measures", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -112,7 +112,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).
-				Should(BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				Should(BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -153,7 +153,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -167,7 +167,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -182,7 +182,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -197,7 +197,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -212,7 +212,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -227,7 +227,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -241,7 +241,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -256,7 +256,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -271,7 +271,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -286,7 +286,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -301,7 +301,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -316,7 +316,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -331,7 +331,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -346,7 +346,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -361,7 +361,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -376,7 +376,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -406,7 +406,7 @@ var _ = Describe("BWW Parser", func() {
 				}))
 			nilAllMeasureMessages(musicTunesBww)
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -421,7 +421,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -436,7 +436,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -451,7 +451,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -466,7 +466,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -481,7 +481,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -496,7 +496,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -511,7 +511,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -526,7 +526,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -541,7 +541,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -556,7 +556,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -571,7 +571,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -586,7 +586,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -601,7 +601,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -616,7 +616,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -631,7 +631,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -646,7 +646,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -661,7 +661,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -676,7 +676,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -691,7 +691,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -706,7 +706,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -721,7 +721,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -736,7 +736,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -751,7 +751,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -766,7 +766,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -781,7 +781,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -796,7 +796,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -811,7 +811,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -826,7 +826,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -841,7 +841,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -856,7 +856,7 @@ var _ = Describe("BWW Parser", func() {
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.CompareOpts))
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 

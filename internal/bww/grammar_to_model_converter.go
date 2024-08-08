@@ -7,6 +7,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/boundary"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/length"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/measure"
+	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/pitch"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols/accidental"
@@ -16,7 +17,6 @@ import (
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols/timeline"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols/tuplet"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/common/music_model"
 	"reflect"
 	"strconv"
 	"strings"
@@ -30,8 +30,8 @@ type staffContext struct {
 	PreviousStaveMeasures []*measure.Measure
 }
 
-func convertGrammarToModel(grammar *BwwDocument) (music_model.MusicModel, error) {
-	var tunes music_model.MusicModel
+func convertGrammarToModel(grammar *BwwDocument) (musicmodel.MusicModel, error) {
+	var tunes musicmodel.MusicModel
 
 	var newTune *tune.Tune
 	staffCtx := &staffContext{
