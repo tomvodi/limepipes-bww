@@ -44,7 +44,7 @@ func (p *plug) importTunesFromData(tunesData []byte) (*messages.ImportFileRespon
 	var muModel musicmodel.MusicModel
 	muModel, err := p.parser.ParseBwwData(tunesData)
 	if err != nil {
-		return nil, fmt.Errorf("failed parsing file: %v", err)
+		return nil, fmt.Errorf("failed parsing tune data: %v", err)
 	}
 
 	log.Trace().Msgf("successfully parsed %d tunes",
@@ -60,8 +60,10 @@ func (p *plug) importTunesFromData(tunesData []byte) (*messages.ImportFileRespon
 	}
 
 	if len(bwwFileTuneData.TuneTitles()) != len(muModel) {
-		log.Error().Msgf("splited bww file and music model don't have the same amount of tunes."+
+		errMsg := fmt.Sprintf("splited bww file and music model don't have the same amount of tunes."+
 			" Music model: %d, BWW file: %d", len(muModel), len(bwwFileTuneData.TuneTitles()))
+		log.Error().Msgf(errMsg)
+		return nil, fmt.Errorf(errMsg)
 	}
 
 	parsedTunes := make([]*messages.ImportedTune, len(muModel))
@@ -73,12 +75,7 @@ func (p *plug) importTunesFromData(tunesData []byte) (*messages.ImportFileRespon
 	}
 
 	return &messages.ImportFileResponse{
-		ImportedTunes: []*messages.ImportedTune{
-			{
-				Tune:         nil,
-				TuneFileData: nil,
-			},
-		},
+		ImportedTunes: parsedTunes,
 	}, nil
 }
 
