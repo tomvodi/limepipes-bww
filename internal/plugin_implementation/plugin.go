@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
-	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/file_type"
+	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/fileformat"
 	plugininterfaces "github.com/tomvodi/limepipes-plugin-api/plugin/v1/interfaces"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
@@ -84,7 +84,7 @@ func (p *plug) PluginInfo() (*messages.PluginInfoResponse, error) {
 	return &messages.PluginInfoResponse{
 		Name:           "BWW Plugin",
 		Description:    "Import Bagpipe Music Writer and Bagpipe Player files.",
-		FileType:       file_type.Type_BWW,
+		FileFormat:     fileformat.Format_BWW,
 		Type:           messages.PluginType_IN,
 		FileExtensions: []string{".bww", ".bmw"},
 	}, nil
