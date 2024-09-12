@@ -2,3 +2,5 @@ github.com/alecthomas/participle/v2 v2.1.1 h1:hrjKESvSqGHzRb4yW1ciisFJ4p3MGYih6i
 github.com/alecthomas/participle/v2 v2.1.1/go.mod h1:Y1+hAs8DHPmc3YUFzqllV+eSQ9ljPTk0ZkPMtEdAx2c=
 github.com/tomvodi/limepipes-plugin-api v0.0.0-20240804112423-f133a2f682d8 h1:csIT/p0Oi4MoHtF5ZPx0RhO0D2+n3iNadE2vht9Rfjk=
 github.com/tomvodi/limepipes-plugin-api v0.0.0-20240804112423-f133a2f682d8/go.mod h1:hJsT7DGbRLZGDavuFG/rNyYC9ofQQfkmP40xJ+BX7f0=
+github.com/tomvodi/limepipes-plugin-api v1.0.0-alpha2 h1:0tci4rPs6mq2U40i8Ww5xjhr6c0ZtX/T7VmXqc5LT6o=
+github.com/tomvodi/limepipes-plugin-api v1.0.0-alpha2/go.mod h1:uBHFDSB9ZIh0aWW13SEqcodc53cke10j5vjEitm1n8Q=

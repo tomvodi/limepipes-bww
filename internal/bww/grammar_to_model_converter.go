@@ -1102,13 +1102,13 @@ func handleVariant(
 
 func handleIrregularGroup(
 	boundary boundary.Boundary,
-	ttype tuplet.TupletType,
+	ttype tuplet.Type,
 ) (*symbols.Symbol, error) {
 	return newIrregularGroup(boundary, ttype), nil
 }
 
 func newIrregularGroup(boundary boundary.Boundary,
-	ttype tuplet.TupletType,
+	ttype tuplet.Type,
 ) *symbols.Symbol {
 	tpl := tuplet.NewTuplet(boundary, ttype)
 	return &symbols.Symbol{
@@ -1116,7 +1116,7 @@ func newIrregularGroup(boundary boundary.Boundary,
 	}
 }
 
-func tupletTypeFromSymbol(sym *string) tuplet.TupletType {
+func tupletTypeFromSymbol(sym *string) tuplet.Type {
 	if strings.HasPrefix(*sym, "^2") {
 		return tuplet.Type23
 	}

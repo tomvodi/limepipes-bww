@@ -4,7 +4,7 @@ import (
 	"github.com/hashicorp/go-plugin"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/common"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/fileformat"
-	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/grpc_plugin"
+	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/grpcplugin"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common/helper"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/plugin_implementation"
@@ -27,7 +27,7 @@ func main() {
 	plugin.Serve(&plugin.ServeConfig{
 		HandshakeConfig: common.HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
-			fileformat.Format_BWW.String(): grpc_plugin.NewGrpcPlugin(
+			fileformat.Format_BWW.String(): grpcplugin.NewGrpcPlugin(
 				impl,
 			),
 		},
