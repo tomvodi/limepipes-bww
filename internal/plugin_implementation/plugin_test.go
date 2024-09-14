@@ -22,7 +22,7 @@ var _ = Describe("Import tunes", func() {
 	var tune1FileData []byte
 	var tuneData []byte
 	var err error
-	var response *messages.ImportFileResponse
+	var parsedTunes []*messages.ParsedTune
 
 	BeforeEach(func() {
 		parser = mocks.NewBwwParser(GinkgoT())
@@ -38,7 +38,7 @@ var _ = Describe("Import tunes", func() {
 	})
 
 	JustBeforeEach(func() {
-		response, err = lpPlug.Import(tuneData)
+		parsedTunes, err = lpPlug.Parse(tuneData)
 	})
 
 	Context("parser returns an error", func() {
@@ -106,13 +106,11 @@ var _ = Describe("Import tunes", func() {
 
 			It("should succeed", func() {
 				Expect(err).ShouldNot(HaveOccurred())
-				Expect(response).Should(BeComparableTo(
-					&messages.ImportFileResponse{
-						ImportedTunes: []*messages.ImportedTune{
-							{
-								Tune:         testMusicModel[0],
-								TuneFileData: tune1FileData,
-							},
+				Expect(parsedTunes).Should(BeComparableTo(
+					[]*messages.ParsedTune{
+						{
+							Tune:         testMusicModel[0],
+							TuneFileData: tune1FileData,
 						},
 					},
 					helper.MusicModelCompareOptions))

@@ -326,7 +326,7 @@ func appendTieStartToPreviousNote(
 		}
 		if lastSym == nil {
 			msg := fmt.Sprintf("tie in old format (%s) must follow a note and can't be the first symbol in a measure", staffSym)
-			currentMeasure.AddMessage(&measure.ImportMessage{
+			currentMeasure.AddMessage(&measure.ParserMessage{
 				Symbol:   staffSym,
 				Severity: measure.Severity_Warning,
 				Text:     msg,
@@ -349,7 +349,7 @@ func appendTieStartToPreviousNote(
 			"tie in old format (%s) must follow a note with pitch and length",
 			staffSym,
 		)
-		currentMeasure.AddMessage(&measure.ImportMessage{
+		currentMeasure.AddMessage(&measure.ParserMessage{
 			Symbol:   staffSym,
 			Severity: measure.Severity_Error,
 			Text:     msg,
