@@ -131,6 +131,10 @@ var Lexer = lexer.MustStateful(lexer.Rules{
 			Pattern: `,`,
 		},
 		{
+			Name:    "MUSIC_SYMBOL",
+			Pattern: `[A-Za-z0-9_'^]+`,
+		},
+		{
 			Name:    "WHITESPACE",
 			Pattern: `\s+`,
 		},

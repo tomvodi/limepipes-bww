@@ -9,6 +9,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww/converter"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/bww/symbolmapper"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/utils"
 	"io"
@@ -61,7 +62,8 @@ var _ = Describe("BWW Parser", func() {
 	BeforeEach(func() {
 		fs := bww.NewBwwFileTuneSplitter()
 		sp := NewDocumentStructureParser()
-		gc := converter.New()
+		m := symbolmapper.New()
+		gc := converter.New(m)
 		parser = New(fs, sp, gc)
 	})
 

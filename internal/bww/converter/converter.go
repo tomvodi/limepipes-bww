@@ -2,6 +2,7 @@
 package converter
 
 import (
+	"errors"
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/barline"
@@ -13,6 +14,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols/timeline"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 	"reflect"
 	"strconv"
 )
@@ -26,15 +28,16 @@ type staffContext struct {
 }
 
 type Converter struct {
+	mapper interfaces.SymbolMapper
 }
 
 func (c *Converter) Convert(
 	grammar *common.BwwStructure,
 ) (musicmodel.MusicModel, error) {
-	return convertGrammarToModel(grammar)
+	return c.convertGrammarToModel(grammar)
 }
 
-func convertGrammarToModel(
+func (c *Converter) convertGrammarToModel(
 	grammar *common.BwwStructure,
 ) (musicmodel.MusicModel, error) {
 	var tunes musicmodel.MusicModel
@@ -67,7 +70,7 @@ func convertGrammarToModel(
 		}
 
 		// TODO when tempo only of first t, set to other tunes as well?
-		if err := fillTunePartsFromStaves(newTune, t.Body.Staffs, staffCtx); err != nil {
+		if err := c.fillTunePartsFromStaves(newTune, t.Body.Staffs, staffCtx); err != nil {
 			return nil, err
 		}
 	}
@@ -118,7 +121,7 @@ func fillTuneWithParameter(
 	return nil
 }
 
-func fillTunePartsFromStaves(
+func (c *Converter) fillTunePartsFromStaves(
 	tune *tune.Tune,
 	staves []*common.Staff,
 	staffCtx *staffContext,
@@ -126,7 +129,7 @@ func fillTunePartsFromStaves(
 	var measures []*measure.Measure
 
 	for _, stave := range staves {
-		staveMeasures, err := getMeasuresFromStave(stave, staffCtx)
+		staveMeasures, err := c.getMeasuresFromStave(stave, staffCtx)
 		if err != nil {
 			return err
 		}
@@ -158,7 +161,7 @@ func fillTunePartsFromStaves(
 	return nil
 }
 
-func getMeasuresFromStave(
+func (c *Converter) getMeasuresFromStave(
 	stave *common.Staff,
 	ctx *staffContext,
 ) ([]*measure.Measure, error) {
@@ -192,6 +195,32 @@ func getMeasuresFromStave(
 				LeftBarline: leftBarline,
 			}
 
+			continue
+		}
+
+		if c.mapper.IsTimeSignature(*staffSym.MusicSymbol) {
+			ts, err := c.mapper.TimeSigForToken(*staffSym.MusicSymbol)
+			if err != nil {
+				return nil, err
+			}
+			currMeasure.Time = ts
+			continue
+		}
+
+		if staffSym.MusicSymbol != nil {
+			sym, err := c.mapper.SymbolForToken(*staffSym.MusicSymbol)
+			if errors.Is(err, common.ErrSymbolNotFound) {
+				return nil, fmt.Errorf(
+					"symbol %s not found: line %d, column %d",
+					*staffSym.MusicSymbol,
+					staffSym.Pos.Line,
+					staffSym.Pos.Column,
+				)
+			}
+			if err != nil {
+				return nil, err
+			}
+			currMeasure.Symbols = append(currMeasure.Symbols, sym)
 			continue
 		}
 	}
@@ -277,6 +306,10 @@ func newTimeLineEnd(sym *string) *symbols.Symbol {
 	}
 }
 
-func New() *Converter {
-	return &Converter{}
+func New(
+	mapper interfaces.SymbolMapper,
+) *Converter {
+	return &Converter{
+		mapper: mapper,
+	}
 }
