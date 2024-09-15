@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 	"regexp"
 )
 
 const matchStart = 0
 
-type bwwFileSplitter struct {
+type FileSplitter struct {
 }
 
-func (b *bwwFileSplitter) SplitFileData(data []byte) (fileTuneData *common.BwwFileTuneData, err error) {
+//nolint:revive // will be refactored later anyway
+func (b *FileSplitter) SplitFileData(
+	data []byte,
+) (fileTuneData *common.BwwFileTuneData, err error) {
 	fileTuneData = common.NewBwwFileTuneData()
 
 	reg := regexp.MustCompile(`"[^"]*"\s*,\s*\(\s*T`)
@@ -34,12 +36,12 @@ func (b *bwwFileSplitter) SplitFileData(data []byte) (fileTuneData *common.BwwFi
 	for _, tune := range results {
 		titles := re.FindSubmatch(tune)
 		if len(titles) != 1 {
-			log.Error().Msgf("tune has more than one title")
+			log.Error().Msg("tune has more than one title")
 		}
 		if len(titles) == 0 {
 			msg := "no title found in tune"
-			log.Error().Msgf(msg)
-			return nil, fmt.Errorf(msg)
+			log.Error().Msgf("%s", msg)
+			return nil, fmt.Errorf("%s", msg)
 		}
 
 		fileTuneData.AddTuneData(
@@ -51,6 +53,6 @@ func (b *bwwFileSplitter) SplitFileData(data []byte) (fileTuneData *common.BwwFi
 	return fileTuneData, nil
 }
 
-func NewBwwFileTuneSplitter() interfaces.BwwFileByTuneSplitter {
-	return &bwwFileSplitter{}
+func NewBwwFileTuneSplitter() *FileSplitter {
+	return &FileSplitter{}
 }

@@ -1,4 +1,4 @@
-package plugin_implementation
+package pluginimplementation
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/fileformat"
-	plugininterfaces "github.com/tomvodi/limepipes-plugin-api/plugin/v1/interfaces"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 	"google.golang.org/grpc/codes"
@@ -14,13 +13,13 @@ import (
 	"os"
 )
 
-type plug struct {
+type Plugin struct {
 	parser       interfaces.BwwParser
 	tuneFixer    interfaces.TuneFixer
 	fileSplitter interfaces.BwwFileByTuneSplitter
 }
 
-func (p *plug) PluginInfo() (*messages.PluginInfoResponse, error) {
+func (p *Plugin) PluginInfo() (*messages.PluginInfoResponse, error) {
 	return &messages.PluginInfoResponse{
 		Name:           "BWW Plugin",
 		Description:    "Import Bagpipe Music Writer and Bagpipe Player files.",
@@ -30,20 +29,20 @@ func (p *plug) PluginInfo() (*messages.PluginInfoResponse, error) {
 	}, nil
 }
 
-func (p *plug) ExportToFile(
+func (p *Plugin) ExportToFile(
 	[]*tune.Tune,
 	string,
 ) error {
 	return status.Error(codes.Unimplemented, "ExportToFile not implemented")
 }
 
-func (p *plug) Export(
+func (p *Plugin) Export(
 	[]*tune.Tune,
 ) ([]byte, error) {
 	return nil, status.Error(codes.Unimplemented, "Export not implemented")
 }
 
-func (p *plug) ParseFromFile(
+func (p *Plugin) ParseFromFile(
 	filePath string,
 ) ([]*messages.ParsedTune, error) {
 	fileData, err := os.ReadFile(filePath)
@@ -60,17 +59,17 @@ func (p *plug) ParseFromFile(
 	return msg, nil
 }
 
-func (p *plug) Parse(
+func (p *Plugin) Parse(
 	data []byte,
 ) ([]*messages.ParsedTune, error) {
 	return p.parseTunesFromData(data)
 }
 
-func (p *plug) parseTunesFromData(tunesData []byte) ([]*messages.ParsedTune, error) {
+func (p *Plugin) parseTunesFromData(tunesData []byte) ([]*messages.ParsedTune, error) {
 	var muModel musicmodel.MusicModel
 	muModel, err := p.parser.ParseBwwData(tunesData)
 	if err != nil {
-		return nil, fmt.Errorf("failed parsing tune data: %v", err)
+		return nil, fmt.Errorf("failed parsing t data: %v", err)
 	}
 
 	log.Trace().Msgf("successfully parsed %d tunes",
@@ -82,20 +81,20 @@ func (p *plug) parseTunesFromData(tunesData []byte) ([]*messages.ParsedTune, err
 	bwwFileTuneData, err := p.fileSplitter.SplitFileData(tunesData)
 	if err != nil {
 		msg := fmt.Sprintf("failed splitting data by tunes: %s", err.Error())
-		return nil, fmt.Errorf(msg)
+		return nil, fmt.Errorf("%s", msg)
 	}
 
 	if len(bwwFileTuneData.TuneTitles()) != len(muModel) {
 		errMsg := fmt.Sprintf("splited bww file and music model don't have the same amount of tunes."+
 			" Music model: %d, BWW file: %d", len(muModel), len(bwwFileTuneData.TuneTitles()))
-		log.Error().Msgf(errMsg)
-		return nil, fmt.Errorf(errMsg)
+		log.Error().Msgf("%s", errMsg)
+		return nil, fmt.Errorf("%s", errMsg)
 	}
 
 	parsedTunes := make([]*messages.ParsedTune, len(muModel))
-	for i, tune := range muModel {
+	for i, t := range muModel {
 		parsedTunes[i] = &messages.ParsedTune{
-			Tune:         tune,
+			Tune:         t,
 			TuneFileData: bwwFileTuneData.Data(i),
 		}
 	}
@@ -107,8 +106,8 @@ func NewPluginImplementation(
 	parser interfaces.BwwParser,
 	tuneFixer interfaces.TuneFixer,
 	fileSplitter interfaces.BwwFileByTuneSplitter,
-) plugininterfaces.LimePipesPlugin {
-	return &plug{
+) *Plugin {
+	return &Plugin{
 		parser:       parser,
 		tuneFixer:    tuneFixer,
 		fileSplitter: fileSplitter,

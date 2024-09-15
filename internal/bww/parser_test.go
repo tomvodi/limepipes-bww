@@ -23,6 +23,7 @@ func dataFromFile(filePath string) []byte {
 	return data
 }
 
+//nolint:unused
 func exportToYaml(muMo musicmodel.MusicModel, filePath string) {
 	data, err := yaml.Marshal(muMo)
 	Expect(err).ShouldNot(HaveOccurred())
@@ -42,8 +43,8 @@ func importFromYaml(filePath string) musicmodel.MusicModel {
 
 func nilAllMeasureMessages(muMo musicmodel.MusicModel) {
 	for _, tune := range muMo {
-		for _, measure := range tune.Measures {
-			measure.ImportMessages = nil
+		for _, m := range tune.Measures {
+			m.ParserMessages = nil
 		}
 	}
 }
@@ -390,15 +391,15 @@ var _ = Describe("BWW Parser", func() {
 
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww[0].Measures[0].ImportMessages[0]).Should(
-				Equal(&measure.ImportMessage{
+			Expect(musicTunesBww[0].Measures[0].ParserMessages[0]).Should(
+				Equal(&measure.ParserMessage{
 					Symbol:   "^tla",
 					Severity: measure.Severity_Warning,
 					Text:     "tie in old format (^tla) must follow a note and can't be the first symbol in a measure",
 					Fix:      measure.Fix_SkipSymbol,
 				}))
-			Expect(musicTunesBww[0].Measures[1].ImportMessages[0]).Should(
-				Equal(&measure.ImportMessage{
+			Expect(musicTunesBww[0].Measures[1].ParserMessages[0]).Should(
+				Equal(&measure.ParserMessage{
 					Symbol:   "^tlg",
 					Severity: measure.Severity_Error,
 					Text:     "tie in old format (^tlg) must follow a note with pitch and length",
@@ -883,5 +884,4 @@ var _ = Describe("BWW Parser", func() {
 			Expect(musicTunesBww).To(HaveLen(11))
 		})
 	})
-
 })

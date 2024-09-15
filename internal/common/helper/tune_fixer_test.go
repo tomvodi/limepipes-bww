@@ -189,20 +189,19 @@ func Test_fixComposer(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
+		t.Run(tt.name, func(*testing.T) {
 			f := &fields{}
 
 			if tt.prepare != nil {
 				tt.prepare(f)
 			}
 
-			tune := &tune.Tune{
+			t := &tune.Tune{
 				Composer: f.composer,
 			}
-			fixComposerArranger(tune)
-			g.Expect(tune.Composer).To(Equal(f.wantComposer))
-			g.Expect(tune.Arranger).To(Equal(f.wantArranger))
+			fixComposerArranger(t)
+			g.Expect(t.Composer).To(Equal(f.wantComposer))
+			g.Expect(t.Arranger).To(Equal(f.wantArranger))
 		})
 	}
 }
@@ -262,19 +261,18 @@ func Test_fixComposerTrad(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
+		t.Run(tt.name, func(*testing.T) {
 			f := &fields{}
 
 			if tt.prepare != nil {
 				tt.prepare(f)
 			}
 
-			tune := &tune.Tune{
+			t := &tune.Tune{
 				Composer: f.composer,
 			}
-			fixComposerTrad(tune)
-			g.Expect(tune.Composer).To(Equal(f.wantComposer))
+			fixComposerTrad(t)
+			g.Expect(t.Composer).To(Equal(f.wantComposer))
 		})
 	}
 }
@@ -306,19 +304,18 @@ func Test_removeTimeSigFromTuneType(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
+		t.Run(tt.name, func(*testing.T) {
 			f := &fields{}
 
 			if tt.prepare != nil {
 				tt.prepare(f)
 			}
 
-			tune := &tune.Tune{
+			t := &tune.Tune{
 				Type: f.tuneType,
 			}
-			removeTimeSigFromTuneType(tune)
-			g.Expect(tune.Type).To(Equal(f.wantTuneType))
+			removeTimeSigFromTuneType(t)
+			g.Expect(t.Type).To(Equal(f.wantTuneType))
 		})
 	}
 }
@@ -343,19 +340,18 @@ func Test_capitalizeTuneType(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
+		t.Run(tt.name, func(*testing.T) {
 			f := &fields{}
 
 			if tt.prepare != nil {
 				tt.prepare(f)
 			}
 
-			tune := &tune.Tune{
+			t := &tune.Tune{
 				Type: f.tuneType,
 			}
-			capitalizeTuneType(tune)
-			g.Expect(tune.Type).To(Equal(f.wantTuneType))
+			capitalizeTuneType(t)
+			g.Expect(t.Type).To(Equal(f.wantTuneType))
 		})
 	}
 }
@@ -392,25 +388,24 @@ func Test_trimSpaces(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
+		t.Run(tt.name, func(*testing.T) {
 			f := &fields{}
 
 			if tt.prepare != nil {
 				tt.prepare(f)
 			}
 
-			tune := &tune.Tune{
+			t := &tune.Tune{
 				Type:     f.tuneType,
 				Title:    f.tuneTitle,
 				Composer: f.tuneComposer,
 				Arranger: f.tuneArranger,
 			}
-			trimSpaces(tune)
-			g.Expect(tune.Title).To(Equal(f.wantTuneTitle))
-			g.Expect(tune.Type).To(Equal(f.wantTuneType))
-			g.Expect(tune.Composer).To(Equal(f.wantTuneComposer))
-			g.Expect(tune.Arranger).To(Equal(f.wantTuneArranger))
+			trimSpaces(t)
+			g.Expect(t.Title).To(Equal(f.wantTuneTitle))
+			g.Expect(t.Type).To(Equal(f.wantTuneType))
+			g.Expect(t.Composer).To(Equal(f.wantTuneComposer))
+			g.Expect(t.Arranger).To(Equal(f.wantTuneArranger))
 		})
 	}
 }
@@ -435,19 +430,18 @@ func Test_fixTitle(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
+		t.Run(tt.name, func(*testing.T) {
 			f := &fields{}
 
 			if tt.prepare != nil {
 				tt.prepare(f)
 			}
 
-			tune := &tune.Tune{
+			t := &tune.Tune{
 				Title: f.tuneTitle,
 			}
-			fixTitle(tune)
-			g.Expect(tune.Title).To(Equal(f.wantTuneTitle))
+			fixTitle(t)
+			g.Expect(t.Title).To(Equal(f.wantTuneTitle))
 		})
 	}
 }

@@ -3,13 +3,12 @@ package bww
 import (
 	"github.com/alecthomas/participle/v2"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 )
 
-type bwwParser struct {
+type Parser struct {
 }
 
-func (b *bwwParser) ParseBwwData(data []byte) (musicmodel.MusicModel, error) {
+func (b *Parser) ParseBwwData(data []byte) (musicmodel.MusicModel, error) {
 	parser, err := participle.Build[BwwDocument](
 		participle.Elide("WHITESPACE"),
 		participle.Lexer(BwwLexer),
@@ -28,6 +27,6 @@ func (b *bwwParser) ParseBwwData(data []byte) (musicmodel.MusicModel, error) {
 	return convertGrammarToModel(bwwDoc)
 }
 
-func NewBwwParser() interfaces.BwwParser {
-	return &bwwParser{}
+func NewBwwParser() *Parser {
+	return &Parser{}
 }
