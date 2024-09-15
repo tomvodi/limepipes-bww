@@ -7,7 +7,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/grpcplugin"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common/helper"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/plugin_implementation"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/pluginimplementation"
 	"google.golang.org/grpc"
 )
 
@@ -18,7 +18,7 @@ func defaultGRPCServer(opts []grpc.ServerOption) *grpc.Server {
 }
 
 func main() {
-	impl := plugin_implementation.NewPluginImplementation(
+	impl := pluginimplementation.NewPluginImplementation(
 		bww.NewBwwParser(),
 		helper.NewTuneFixer(),
 		bww.NewBwwFileTuneSplitter(),

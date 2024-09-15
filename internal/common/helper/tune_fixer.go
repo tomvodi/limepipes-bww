@@ -3,37 +3,35 @@ package helper
 import (
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
-
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"regexp"
 	"strings"
 )
 
-type tuneFix struct {
+type TuneFixer struct {
 }
 
-func (t *tuneFix) Fix(muMo musicmodel.MusicModel) {
-	for _, tune := range muMo {
-		fixComposerArranger(tune)
-		fixComposerTrad(tune)
-		removeTimeSigFromTuneType(tune)
-		removeSpecialCharsFromTuneType(tune)
-		trimSpaces(tune)
-		fixTitle(tune)
-		capitalizeTuneType(tune)
+func (tf *TuneFixer) Fix(muMo musicmodel.MusicModel) {
+	for _, t := range muMo {
+		fixComposerArranger(t)
+		fixComposerTrad(t)
+		removeTimeSigFromTuneType(t)
+		removeSpecialCharsFromTuneType(t)
+		trimSpaces(t)
+		fixTitle(t)
+		capitalizeTuneType(t)
 	}
 }
 
-func fixComposerArranger(tune *tune.Tune) {
-	if tune.Composer == "" {
+func fixComposerArranger(t *tune.Tune) {
+	if t.Composer == "" {
 		return
 	}
 
-	//parts := strings.Split(tune.Composer, ",-([")
+	//parts := strings.Split(t.Composer, ",-([")
 	regX := regexp.MustCompile(`(?i)arranged|arrangement|arr[.:/ ]+`)
-	parts := regX.Split(tune.Composer, -1)
+	parts := regX.Split(t.Composer, -1)
 	if len(parts) == 2 {
 		arranger := fixComposerArrangerField(parts[1])
 		sep := regexp.MustCompile(`,|-`)
@@ -41,56 +39,56 @@ func fixComposerArranger(tune *tune.Tune) {
 
 		// tuneTitle after arranger
 		if len(arrangerSplit) > 1 {
-			tune.Arranger = fixComposerArrangerField(arrangerSplit[0])
-			tune.Composer = fixComposerArrangerField(arrangerSplit[1])
+			t.Arranger = fixComposerArrangerField(arrangerSplit[0])
+			t.Composer = fixComposerArrangerField(arrangerSplit[1])
 			return
 		}
 
 		// tuneTitle before arranger
 		if strings.TrimSpace(parts[0]) != "" {
-			tune.Composer = fixComposerArrangerField(parts[0])
-			tune.Arranger = arranger
+			t.Composer = fixComposerArrangerField(parts[0])
+			t.Arranger = arranger
 		} else {
 			// only arranger in tuneTitle field
-			tune.Composer = ""
-			tune.Arranger = arranger
+			t.Composer = ""
+			t.Arranger = arranger
 		}
 	}
 }
 
-func fixComposerTrad(tune *tune.Tune) {
+func fixComposerTrad(t *tune.Tune) {
 	regX := regexp.MustCompile(`(?i)^trad\.?$`)
-	trimmedComposer := strings.TrimSpace(tune.Composer)
+	trimmedComposer := strings.TrimSpace(t.Composer)
 	if regX.MatchString(trimmedComposer) {
-		tune.Composer = "Traditional"
+		t.Composer = "Traditional"
 	}
 }
 
-func removeTimeSigFromTuneType(tune *tune.Tune) {
-	trimmedType := strings.TrimSpace(tune.Type)
+func removeTimeSigFromTuneType(t *tune.Tune) {
+	trimmedType := strings.TrimSpace(t.Type)
 	regX := regexp.MustCompile(`\d+/\d+`)
 	typeWithoutTimesig := regX.ReplaceAllString(trimmedType, "")
 	typeWithoutTimesig = strings.TrimSpace(typeWithoutTimesig)
-	tune.Type = typeWithoutTimesig
+	t.Type = typeWithoutTimesig
 }
 
-func removeSpecialCharsFromTuneType(tune *tune.Tune) {
-	trimmedType := strings.TrimSpace(tune.Type)
+func removeSpecialCharsFromTuneType(t *tune.Tune) {
+	trimmedType := strings.TrimSpace(t.Type)
 	trimmedType = strings.Trim(trimmedType, ".:/-|")
-	tune.Type = trimmedType
+	t.Type = trimmedType
 }
 
-func trimSpaces(tune *tune.Tune) {
-	tune.Title = strings.TrimSpace(tune.Title)
-	tune.Composer = strings.TrimSpace(tune.Composer)
-	tune.Arranger = strings.TrimSpace(tune.Arranger)
-	tune.Type = strings.TrimSpace(tune.Type)
+func trimSpaces(t *tune.Tune) {
+	t.Title = strings.TrimSpace(t.Title)
+	t.Composer = strings.TrimSpace(t.Composer)
+	t.Arranger = strings.TrimSpace(t.Arranger)
+	t.Type = strings.TrimSpace(t.Type)
 }
 
-func capitalizeTuneType(tune *tune.Tune) {
-	trimmedType := strings.TrimSpace(tune.Type)
+func capitalizeTuneType(t *tune.Tune) {
+	trimmedType := strings.TrimSpace(t.Type)
 	caser := cases.Title(language.English)
-	tune.Type = caser.String(trimmedType)
+	t.Type = caser.String(trimmedType)
 }
 
 func fixComposerArrangerField(arr string) string {
@@ -102,13 +100,13 @@ func fixComposerArrangerField(arr string) string {
 	return arranger
 }
 
-func fixTitle(tune *tune.Tune) {
-	tune.Title = strings.Replace(tune.Title, "_", " ", -1)
+func fixTitle(t *tune.Tune) {
+	t.Title = strings.Replace(t.Title, "_", " ", -1)
 
-	caser := cases.Title(language.English)
-	tune.Title = caser.String(tune.Title)
+	c := cases.Title(language.English)
+	t.Title = c.String(t.Title)
 }
 
-func NewTuneFixer() interfaces.TuneFixer {
-	return &tuneFix{}
+func NewTuneFixer() *TuneFixer {
+	return &TuneFixer{}
 }

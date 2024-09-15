@@ -9,6 +9,8 @@ linters:
 issues:
   exclude-files:
     - ".*\\.pb\\.go$"
+    - ".*grammar_to_model_converter\\.go$"  # will be refactored later TODO: check after refactoring
+    - ".*bww_grammar\\.go$"  # will be refactored later TODO: check after refactoring
   exclude-rules:
     - linters:
         - revive

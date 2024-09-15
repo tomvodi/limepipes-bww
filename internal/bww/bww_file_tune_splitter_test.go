@@ -11,10 +11,10 @@ var _ = Describe("BwwFileTuneSplitter", func() {
 	var fileData []byte
 	var err error
 	var tuneData *common.BwwFileTuneData
-	var splitter *bwwFileSplitter
+	var splitter *FileSplitter
 
 	BeforeEach(func() {
-		splitter = &bwwFileSplitter{}
+		splitter = &FileSplitter{}
 	})
 
 	JustBeforeEach(func() {

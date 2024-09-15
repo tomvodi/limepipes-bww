@@ -1,3 +1,4 @@
+GOBIN ?= $$(go env GOPATH)/bin
 
 .PHONY: test test-cover lint cover-html
 

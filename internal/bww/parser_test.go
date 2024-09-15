@@ -23,6 +23,7 @@ func dataFromFile(filePath string) []byte {
 	return data
 }
 
+//nolint:unused
 func exportToYaml(muMo musicmodel.MusicModel, filePath string) {
 	data, err := yaml.Marshal(muMo)
 	Expect(err).ShouldNot(HaveOccurred())
@@ -42,8 +43,8 @@ func importFromYaml(filePath string) musicmodel.MusicModel {
 
 func nilAllMeasureMessages(muMo musicmodel.MusicModel) {
 	for _, tune := range muMo {
-		for _, measure := range tune.Measures {
-			measure.ParserMessages = nil
+		for _, m := range tune.Measures {
+			m.ParserMessages = nil
 		}
 	}
 }
@@ -883,5 +884,4 @@ var _ = Describe("BWW Parser", func() {
 			Expect(musicTunesBww).To(HaveLen(11))
 		})
 	})
-
 })

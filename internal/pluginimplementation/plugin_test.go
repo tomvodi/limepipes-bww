@@ -1,4 +1,4 @@
-package plugin_implementation
+package pluginimplementation
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 )
 
 var _ = Describe("Import tunes", func() {
-	var lpPlug *plug
+	var lpPlug *Plugin
 	var parser *mocks.BwwParser
 	var tuneFixer *mocks.TuneFixer
 	var fileSplitter *mocks.BwwFileByTuneSplitter
@@ -28,7 +28,7 @@ var _ = Describe("Import tunes", func() {
 		parser = mocks.NewBwwParser(GinkgoT())
 		tuneFixer = mocks.NewTuneFixer(GinkgoT())
 		fileSplitter = mocks.NewBwwFileByTuneSplitter(GinkgoT())
-		lpPlug = &plug{
+		lpPlug = &Plugin{
 			parser:       parser,
 			tuneFixer:    tuneFixer,
 			fileSplitter: fileSplitter,

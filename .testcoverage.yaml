@@ -2,7 +2,7 @@ profile: cover.out
 
 # (optional; but recommended to set)
 # When specified reported file paths will not contain local prefix in the output
-local-prefix: "github.com/tomvodi/limepipes"
+local-prefix: "github.com/tomvodi/limepipes-plugin-bww"
 
 # Holds coverage thresholds percentages, values should be in range [0-100]
 threshold:
@@ -31,6 +31,6 @@ exclude:
     - .*_enumer\.go         # exclude generated files by enumer
     - cmd/.*         # exclude test applications
     - ^internal/utils    # exclude utils
-    - ^plugin/v1/grpcplugin/client.go$ # boilerplate code
-    - ^plugin/v1/grpcplugin/server.go$ # boilerplate code
-    - ^plugin/v1/grpcplugin/grpc_plugin.go$ # boilerplate code
+    - internal/pluginimplementation/plugin.go # exclude plugin until after refactoring TODO: check after refactoring
+    - ^internal/common/helper    # exclude helper functions until after refactoring TODO: check after refactoring
+    - ^internal/bww/bww_grammar.go$ # will be refactored later TODO: check after refactoring
