@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/participle/v2 v2.1.1
 	github.com/goccy/go-yaml v1.12.0
 	github.com/hashicorp/go-plugin v1.6.1
-	github.com/onsi/ginkgo/v2 v2.20.1
+	github.com/onsi/ginkgo/v2 v2.20.2
 	github.com/onsi/gomega v1.34.2
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.8.4
