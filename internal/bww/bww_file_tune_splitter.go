@@ -2,8 +2,6 @@ package bww
 
 import (
 	"bytes"
-	"fmt"
-	"github.com/rs/zerolog/log"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
 	"regexp"
 )
@@ -35,14 +33,6 @@ func (b *FileSplitter) SplitFileData(
 	re := regexp.MustCompile(`"[^"]*"`)
 	for _, tune := range results {
 		titles := re.FindSubmatch(tune)
-		if len(titles) != 1 {
-			log.Error().Msg("tune has more than one title")
-		}
-		if len(titles) == 0 {
-			msg := "no title found in tune"
-			log.Error().Msgf("%s", msg)
-			return nil, fmt.Errorf("%s", msg)
-		}
 
 		fileTuneData.AddTuneData(
 			string(bytes.Trim(titles[0], `"`)),

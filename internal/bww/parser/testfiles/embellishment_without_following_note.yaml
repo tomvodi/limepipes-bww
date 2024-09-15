@@ -1,0 +1,10 @@
+- title: Tune Title
+  comments:
+    - just a single g grace without following melody note
+  tempo: 0
+  measures:
+    - symbols:
+        - note:
+            embellishment:
+                type: SingleGrace
+                pitch: HighG
