@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/alecthomas/participle/v2/lexer"
 )
 
 const TitleParameter = "T"
@@ -15,6 +16,9 @@ type BwwStructure struct {
 }
 
 type Tune struct {
+	Pos    lexer.Position
+	EndPos lexer.Position
+
 	BagpipePlayerVersion string      `(BagpipeReader VERSION_SEP @VersionNumber)*`
 	Header               *TuneHeader `@@+`
 	Body                 *TuneBody   `@@`
@@ -57,6 +61,9 @@ func (t *TuneHeader) GetInlineTexts() []string {
 }
 
 type TuneParameter struct {
+	Pos    lexer.Position
+	EndPos lexer.Position
+
 	Config      *TuneConfig      `@@`
 	Tempo       *TuneTempo       `| @@`
 	Description *TuneDescription `| @@`
@@ -94,6 +101,9 @@ type TuneBody struct {
 }
 
 type Staff struct {
+	Pos    lexer.Position
+	EndPos lexer.Position
+
 	Start        string          `@STAFF_START`
 	Symbols      []*StaffSymbols `@@*`
 	End          string          `@(STAFF_END | EOF)`
@@ -103,11 +113,15 @@ type Staff struct {
 }
 
 type StaffSymbols struct {
+	Pos    lexer.Position
+	EndPos lexer.Position
+
 	PartStart      *string `@PART_START`
 	Barline        *string `| @BARLINE`
 	Space          *string `| @SPACE`
 	NextStaffStart *string `| @NEXT_STAFF_START`
 	Comment        *string `| @STRING`
+	MusicSymbol    *string `| @MUSIC_SYMBOL`
 
 	Description *TuneDescription `| @@`
 	Tempo       *TuneTempo       `| @@`
