@@ -5,6 +5,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/length"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/pitch"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols"
+	"maps"
 )
 
 var pitches = []string{"LG", "LA", "B", "C", "D", "E", "F", "HG", "HA"}
@@ -32,7 +33,7 @@ var lengthMap = map[uint8]length.Length{
 	32: length.Length_Thirtysecond,
 }
 
-func NewMelodyNotesMap() map[string]*symbols.Symbol {
+func newMelodyNotesMap() map[string]*symbols.Symbol {
 	m := make(map[string]*symbols.Symbol, 108)
 	const noFlagType = "%s_%d"
 	const flagType = "%s%s_%d"
@@ -59,4 +60,8 @@ func NewMelodyNotesMap() map[string]*symbols.Symbol {
 	}
 
 	return m
+}
+
+func init() {
+	maps.Copy(symbolsMap, newMelodyNotesMap())
 }

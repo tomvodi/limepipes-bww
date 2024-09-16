@@ -220,6 +220,13 @@ func (c *Converter) getMeasuresFromStave(
 			if err != nil {
 				return nil, err
 			}
+
+			prevSym := currMeasure.LastSymbol()
+			if prevSym != nil && prevSym.CanBeMergedWith(sym) {
+				prevSym.MergeWith(sym)
+				continue
+			}
+
 			currMeasure.Symbols = append(currMeasure.Symbols, sym)
 			continue
 		}

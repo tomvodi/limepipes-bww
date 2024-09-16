@@ -103,7 +103,7 @@ var _ = Describe("BWW Parser", func() {
 			musicTunesExpect = importFromYaml("./testfiles/time_signatures.yaml")
 		})
 
-		It("should have parsed all measures", func() {
+		It("should have parsed all time signatures", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
 				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
@@ -124,12 +124,11 @@ var _ = Describe("BWW Parser", func() {
 		})
 	})
 
-	When("having only an embellishment without a following melody note", func() {
+	When("having single grace notes following a melody note", func() {
 		BeforeEach(func() {
-			bwwData := dataFromFile("./testfiles/embellishment_without_following_note.bww")
+			bwwData := dataFromFile("./testfiles/single_graces.bww")
 			musicTunesBww, err = parser.ParseBwwData(bwwData)
-			musicTunesExpect = importFromYaml("./testfiles/embellishment_without_following_note.yaml")
-			//exportToYaml(musicTunesBww, "./testfiles/embellishment_without_following_note.yaml")
+			musicTunesExpect = importFromYaml("./testfiles/single_graces.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
@@ -138,11 +137,12 @@ var _ = Describe("BWW Parser", func() {
 		})
 	})
 
-	When("having single grace notes following a melody note", func() {
+	When("having only an embellishment without a following melody note", func() {
 		BeforeEach(func() {
-			bwwData := dataFromFile("./testfiles/single_graces.bww")
+			bwwData := dataFromFile("./testfiles/embellishment_without_following_note.bww")
 			musicTunesBww, err = parser.ParseBwwData(bwwData)
-			musicTunesExpect = importFromYaml("./testfiles/single_graces.yaml")
+			musicTunesExpect = importFromYaml("./testfiles/embellishment_without_following_note.yaml")
+			//exportToYaml(musicTunesBww, "./testfiles/embellishment_without_following_note.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
