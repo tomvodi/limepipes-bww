@@ -198,6 +198,10 @@ func (c *Converter) getMeasuresFromStave(
 			continue
 		}
 
+		if staffSym.Space != nil {
+			continue
+		}
+
 		if c.mapper.IsTimeSignature(*staffSym.MusicSymbol) {
 			ts, err := c.mapper.TimeSigForToken(*staffSym.MusicSymbol)
 			if err != nil {
