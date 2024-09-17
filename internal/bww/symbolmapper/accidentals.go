@@ -15,7 +15,7 @@ var accMap = map[string]accidental.Accidental{
 
 func init() {
 	for _, a := range accidentals {
-		for _, p := range lowPitches {
+		for _, p := range lowPitchesLgToHA {
 			symbolsMap[fmt.Sprintf("%s%s", a, p)] = &symbols.Symbol{
 				Note: &symbols.Note{
 					Accidental: accMap[a],
