@@ -38,17 +38,19 @@ var _ = Describe("BwwFileTuneSplitter", func() {
 
 	When("having a file with three tunes in it, where two tunes are the same", func() {
 		BeforeEach(func() {
-			fileData, err = os.ReadFile("./testfiles/three_tunes_two_are_the_same.bww")
+			fileData, err = os.ReadFile("./testfiles/first_tune_no_title.bww")
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 
-		It("should return the tuneData for all three files", func() {
+		It("should return the tuneData for one no name tune", func() {
 			Expect(tuneData.TuneTitles()).
 				To(Equal([]string{
-					"Tune 1 Title",
-					"Tune 2 Title",
-					"Tune 1 Title",
+					"no name",
 				}))
 		})
+	})
+
+	When("having a file with a tune in it that has no title", func() {
+
 	})
 })

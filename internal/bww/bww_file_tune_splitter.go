@@ -30,6 +30,13 @@ func (b *FileSplitter) SplitFileData(
 		}
 	}
 
+	// in case there is no tune title
+	if len(data) > 0 && len(results) == 0 {
+		results = append(results, data)
+		fileTuneData.AddTuneData("no name", data)
+		return
+	}
+
 	re := regexp.MustCompile(`"[^"]*"`)
 	for _, tune := range results {
 		titles := re.FindSubmatch(tune)
