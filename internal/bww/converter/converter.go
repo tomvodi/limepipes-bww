@@ -202,6 +202,19 @@ func (c *Converter) getMeasuresFromStave(
 			continue
 		}
 
+		if staffSym.Comment != nil {
+			handleCommentForMeasure(currMeasure, *staffSym.Comment)
+			continue
+		}
+		if staffSym.Description != nil {
+			handleCommentForMeasure(currMeasure, staffSym.Description.Text)
+			continue
+		}
+
+		if staffSym.MusicSymbol == nil {
+			log.Fatal().Msgf("staff symbol not handled: %v", staffSym)
+		}
+
 		if c.mapper.IsTimeSignature(*staffSym.MusicSymbol) {
 			ts, err := c.mapper.TimeSigForToken(*staffSym.MusicSymbol)
 			if err != nil {
@@ -256,6 +269,25 @@ func (c *Converter) getMeasuresFromStave(
 
 	measures = cleanupAndAppendMeasure(measures, currMeasure)
 	return measures, nil
+}
+
+func handleCommentForMeasure(
+	measure *measure.Measure,
+	comment string,
+) {
+	if measure == nil {
+		return
+	}
+
+	if len(measure.Symbols) == 0 {
+		measure.Comments = append(measure.Comments, comment)
+		return
+	}
+
+	if measure.LastSymbol().IsNote() {
+		measure.LastSymbol().Note.Comment = comment
+		return
+	}
 }
 
 func cleanupAndAppendMeasure(

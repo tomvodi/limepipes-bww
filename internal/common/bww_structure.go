@@ -120,11 +120,11 @@ type StaffSymbols struct {
 	Barline        *string `| @BARLINE`
 	Space          *string `| @SPACE`
 	NextStaffStart *string `| @NEXT_STAFF_START`
-	Comment        *string `| @STRING`
 	MusicSymbol    *string `| @MUSIC_SYMBOL`
 
 	Description *TuneDescription `| @@`
 	Tempo       *TuneTempo       `| @@`
+	Comment     *string          `| @STRING`
 }
 
 func (s StaffSymbols) String() string {
