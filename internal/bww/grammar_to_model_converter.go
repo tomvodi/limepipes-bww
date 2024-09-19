@@ -373,10 +373,6 @@ func cleanupAndAppendMeasure(
 		measure.Symbols = nil
 	}
 
-	if !measure.IsNil() {
-		return append(measures, measure)
-	}
-
 	return measures
 }
 
@@ -471,7 +467,7 @@ func appendStaffSymbolToMeasureSymbols(
 		staffSym.QuarterNote != nil || staffSym.EighthNote != nil ||
 		staffSym.SixteenthNote != nil || staffSym.ThirtysecondNote != nil {
 		// add melody note to last note if it is an emb
-		if lastSym != nil && lastSym.Note != nil && lastSym.Note.IsIncomplete() {
+		if lastSym != nil && lastSym.Note != nil {
 			handleNote(staffSym, lastSym.Note)
 			return nil, nil
 		} else {
@@ -704,7 +700,7 @@ func appendStaffSymbolToMeasureSymbols(
 		return handleEmbellishment(emb.Type_GraceBirl)
 	}
 	if staffSym.Fermata != nil {
-		if lastSym != nil && lastSym.Note != nil && lastSym.Note.HasPitchAndLength() {
+		if lastSym != nil && lastSym.Note != nil {
 			lastSym.Note.Fermata = true
 		}
 	}

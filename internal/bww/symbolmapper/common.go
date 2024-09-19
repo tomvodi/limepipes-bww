@@ -4,6 +4,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/pitch"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols/embellishment"
+	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols/movement"
 )
 
 var lowPitchesLgToHA = []string{"lg", "la", "b", "c", "d", "e", "f", "hg", "ha"}
@@ -38,6 +39,34 @@ func newEmbellishment(
 			sym.Note.Embellishment.Weight = t
 		default:
 			panic("Unknown argument to newEmbellishment")
+		}
+	}
+
+	return sym
+}
+
+func newMovement(
+	mType movement.Type,
+	args ...interface{},
+) *symbols.Symbol {
+	sym := &symbols.Symbol{
+		Note: &symbols.Note{
+			Movement: &movement.Movement{
+				Type: mType,
+			},
+		},
+	}
+
+	for _, arg := range args {
+		switch t := arg.(type) {
+		case movement.Variant:
+			sym.Note.Movement.Variant = t
+		case bool:
+			sym.Note.Movement.Abbreviate = t
+		case pitch.Pitch:
+			sym.Note.Movement.PitchHint = t
+		default:
+			panic("Unknown argument to newMovement")
 		}
 	}
 
