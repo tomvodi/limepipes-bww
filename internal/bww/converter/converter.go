@@ -308,14 +308,14 @@ func handleCommentForMeasure(
 
 func cleanupAndAppendMeasure(
 	measures []*measure.Measure,
-	measure *measure.Measure,
+	m *measure.Measure,
 ) []*measure.Measure {
-	cleanupMeasure(measure)
-	if len(measure.Symbols) == 0 {
-		measure.Symbols = nil
+	cleanupMeasure(m)
+	if len(m.Symbols) == 0 {
+		m.Symbols = nil
 	}
 
-	return append(measures, measure)
+	return append(measures, m)
 }
 
 // cleanupMeasure removes invalid symbols from the measure
