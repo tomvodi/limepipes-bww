@@ -211,6 +211,22 @@ func (c *Converter) getMeasuresFromStave(
 			continue
 		}
 
+		if staffSym.Tempo != nil {
+			t, err := strconv.ParseUint(staffSym.Tempo.Tempo, 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("failed parsing tempo at line %d column %d: %s",
+					staffSym.Pos.Line,
+					staffSym.Pos.Column,
+					err.Error(),
+				)
+			}
+
+			currMeasure.Symbols = append(currMeasure.Symbols, &symbols.Symbol{
+				TempoChange: &t,
+			})
+			continue
+		}
+
 		if staffSym.MusicSymbol == nil {
 			log.Fatal().Msgf("staff symbol not handled: %v", staffSym)
 		}
