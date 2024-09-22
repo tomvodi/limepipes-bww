@@ -1,81 +1,79 @@
-package bwwfile_test
+package bwwfile
 
 import (
+	"fmt"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/bwwfile"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/bwwfile/interfaces"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces/mocks"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/structure"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/utils"
-	"io"
-	"os"
 )
-
-func dataFromFile(filePath string) []byte {
-	bwwFile, err := os.Open(filePath)
-	Expect(err).ShouldNot(HaveOccurred())
-	var data []byte
-	data, err = io.ReadAll(bwwFile)
-	Expect(err).ShouldNot(HaveOccurred())
-
-	return data
-}
 
 var _ = Describe("StructureParser", func() {
 	utils.SetupConsoleLogger()
 	var err error
 	var bwwFile *structure.BwwFile
+	var data []byte
+	var tokens []*common.Token
 	var parser interfaces.StructureParser
+	var conv *mocks.TokenStructureConverter
+	var tokenizer *mocks.FileTokenizer
 
 	BeforeEach(func() {
-		parser = bwwfile.NewStructureParser()
+		data = []byte("test data")
+		tokens = []*common.Token{
+			{Value: "test", Line: 1, Col: 1},
+		}
+
+		tokenizer = mocks.NewFileTokenizer(GinkgoT())
+		conv = mocks.NewTokenStructureConverter(GinkgoT())
+		parser = NewStructureParser(tokenizer, conv)
 	})
 
-	When("parsing a file with a staff with 4 measures in it", func() {
+	JustBeforeEach(func() {
+		bwwFile, err = parser.ParseDocumentStructure(data)
+	})
+
+	When("tokenizer returns an error", func() {
 		BeforeEach(func() {
-			data := dataFromFile("./testfiles/four_measures.bww")
-			bwwFile, err = parser.ParseDocumentStructure(data)
+			tokenizer.EXPECT().Tokenize(data).
+				Return(nil, fmt.Errorf("tokenizer error"))
 		})
 
-		It("should have parsed 4 measures", func() {
+		It("should return an error", func() {
+			Expect(err).Should(HaveOccurred())
+		})
+	})
+
+	When("converter returns an error", func() {
+		BeforeEach(func() {
+			tokenizer.EXPECT().Tokenize(data).
+				Return(tokens, nil)
+			conv.EXPECT().Convert(tokens).
+				Return(nil, fmt.Errorf("converter error"))
+		})
+
+		It("should return an error", func() {
+			Expect(err).Should(HaveOccurred())
+		})
+	})
+
+	When("parsing succeeds", func() {
+		cFile := &structure.BwwFile{
+			BagpipePlayerVersion: "123",
+		}
+		BeforeEach(func() {
+			tokenizer.EXPECT().Tokenize(data).
+				Return(tokens, nil)
+			conv.EXPECT().Convert(tokens).
+				Return(cFile, nil)
+		})
+
+		It("should return the parsed and converted file", func() {
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(bwwFile.TuneDefs).To(HaveLen(1))
-			Expect(bwwFile.TuneDefs[0].Tune.Staffs).To(HaveLen(1))
-			Expect(bwwFile.TuneDefs[0].Tune.Staffs[0].Measures).To(HaveLen(4))
-			Expect(bwwFile.TuneDefs[0].Tune).To(Equal(
-				structure.Tune{
-					Header: structure.TuneHeader{
-						Title: "Tune Title",
-					},
-					Staffs: []structure.Staff{
-						{
-							Measures: []structure.Measure{
-								{
-									Components: []any{
-										&structure.MusicSymbol{
-											Pos: structure.Position{
-												Line:   0,
-												Column: 0,
-											},
-											Text: "4_4",
-										},
-									},
-								},
-								{
-									Components: []any{
-										&structure.MusicSymbol{
-											Pos: structure.Position{
-												Line:   0,
-												Column: 0,
-											},
-											Text: "LA_4",
-										},
-									},
-								},
-							},
-						},
-					},
-				}))
+			Expect(bwwFile).Should(Equal(cFile))
 		})
 	})
 

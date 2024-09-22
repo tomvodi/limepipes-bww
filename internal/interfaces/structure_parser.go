@@ -1,9 +1,9 @@
 package interfaces
 
 import (
-	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/structure"
 )
 
 type StructureParser interface {
-	ParseDocumentStructure(data []byte) (*common.BwwStructure, error)
+	ParseDocumentStructure(data []byte) (*structure.BwwFile, error)
 }

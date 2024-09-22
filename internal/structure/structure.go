@@ -1,7 +1,9 @@
 package structure
 
+type BagpipePlayerVersion string
 type TimelineEnd string
-type Comment string
+type TuneComment string
+type InlineComment string
 type InlineText string
 type Tempo int
 type TuneTitle string
@@ -10,9 +12,11 @@ type TuneComposer string
 type TuneFooter string
 type TuneInline string
 type Barline string
+type StaffStart string
+type StaffEnd string
 
 type BwwFile struct {
-	BagpipePlayerVersion string
+	BagpipePlayerVersion BagpipePlayerVersion
 	TuneDefs             []TuneDefinition
 }
 
@@ -22,29 +26,30 @@ type TuneDefinition struct {
 }
 
 type Tune struct {
-	Header TuneHeader
-	Staffs []Staff
+	Header   *TuneHeader
+	Measures []*Measure
 }
 
 type TuneHeader struct {
-	Title      string
-	Type       string
-	Composer   string
-	Footer     string
-	InlineText string
-}
-
-type Staff struct {
-	Measures []Measure
+	Title       TuneTitle
+	Type        TuneType
+	Composer    TuneComposer
+	Footer      TuneFooter
+	InlineTexts []TuneInline
+	Comments    []TuneComment
 }
 
 type Measure struct {
-	Components []any
+	InlineTexts []InlineText
+	Comments    []InlineComment
+	Symbols     []*MusicSymbol
 }
 
 type MusicSymbol struct {
-	Pos  Position
-	Text string
+	Pos         Position
+	Text        string
+	InlineTexts []InlineText
+	Comments    []InlineComment
 }
 
 type Position struct {
