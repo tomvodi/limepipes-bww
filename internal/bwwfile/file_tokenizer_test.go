@@ -85,6 +85,7 @@ var _ = Describe("FileTokenizer", func() {
 		})
 
 		It("should tokenize the file", func() {
+			printTokens(tokens)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(tokens).Should(BeComparableTo(
 				[]*common.Token{
@@ -93,14 +94,16 @@ var _ = Describe("FileTokenizer", func() {
 					newToken(structure.TuneTitle("Tune Title"), 4, 0),
 					newToken(structure.TuneInline("tune inline text"), 5, 0),
 					newToken(structure.TuneComment("and another comment"), 6, 0),
-					newToken(structure.StaffStart("&"), 8, 0),
-					newToken("LA_4", 8, 2),
-					newToken(structure.StaffEnd("!t"), 8, 7),
-					newToken(structure.InlineText("stave inline text"), 10, 0),
-					newToken(structure.InlineComment("stave comment"), 11, 0),
-					newToken(structure.StaffStart("&"), 13, 0),
-					newToken("D_4", 13, 3),
-					newToken("!I", 13, 7),
+					newToken(structure.StaffInline("staff inline text"), 8, 0),
+					newToken(structure.StaffComment("staff comment"), 9, 0),
+					newToken(structure.StaffStart("&"), 11, 0),
+					newToken("LA_4", 11, 2),
+					newToken(structure.StaffEnd("!t"), 11, 7),
+					newToken(structure.StaffInline("staff inline text"), 13, 0),
+					newToken(structure.StaffComment("staff comment"), 14, 0),
+					newToken(structure.StaffStart("&"), 16, 0),
+					newToken("D_4", 16, 3),
+					newToken(structure.StaffEnd("!I"), 16, 7),
 				}),
 			)
 		})

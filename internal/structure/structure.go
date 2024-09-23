@@ -14,6 +14,8 @@ type TuneInline string
 type Barline string
 type StaffStart string
 type StaffEnd string
+type StaffComment string
+type StaffInline string
 
 type BwwFile struct {
 	BagpipePlayerVersion BagpipePlayerVersion
@@ -40,9 +42,11 @@ type TuneHeader struct {
 }
 
 type Measure struct {
-	InlineTexts []InlineText
-	Comments    []InlineComment
-	Symbols     []*MusicSymbol
+	StaffComments    []StaffComment
+	StaffInlineTexts []StaffInline
+	InlineTexts      []InlineText
+	InlineComments   []InlineComment
+	Symbols          []*MusicSymbol
 }
 
 type MusicSymbol struct {

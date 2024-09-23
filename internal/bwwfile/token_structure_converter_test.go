@@ -159,7 +159,7 @@ var _ = Describe("TokenStructureConverter", func() {
 									},
 								},
 								{
-									Comments: []structure.InlineComment{
+									InlineComments: []structure.InlineComment{
 										"measure comment",
 									},
 									Symbols: []*structure.MusicSymbol{
@@ -169,6 +169,93 @@ var _ = Describe("TokenStructureConverter", func() {
 											},
 											Pos:  structure.Position{Line: 4, Column: 2},
 											Text: "LA_4",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}))
+		})
+	})
+
+	When("converting tune with staff comments (comments that appear right before a starting staff", func() {
+		BeforeEach(func() {
+			tokens = []*common.Token{
+				newToken(structure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+				newToken(structure.TuneComment("just a comment"), 2, 0),
+				newToken(structure.TuneTitle("Tune Title"), 4, 0),
+				newToken(structure.TuneInline("tune inline text"), 5, 0),
+				newToken(structure.TuneComment("and another tune comment"), 6, 0),
+				newToken(structure.StaffInline("staff inline text"), 8, 0),
+				newToken(structure.StaffComment("staff comment"), 9, 0),
+				newToken(structure.StaffStart("&"), 11, 0),
+				newToken("LA_4", 11, 2),
+				newToken(structure.StaffEnd("!t"), 11, 7),
+				newToken(structure.StaffInline("staff inline comment in between"), 13, 0),
+				newToken(structure.StaffComment("staff comment in between"), 14, 0),
+				newToken(structure.StaffStart("&"), 16, 0),
+				newToken("D_4", 16, 3),
+				newToken(structure.StaffEnd("!I"), 16, 7),
+			}
+		})
+
+		It("should convert the tokens to a BwwFile", func() {
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(bwwFile).Should(BeComparableTo(&structure.BwwFile{
+				BagpipePlayerVersion: "Bagpipe Reader:1.0",
+				TuneDefs: []structure.TuneDefinition{
+					{
+						Data: []byte(`Bagpipe Reader:1.0
+"just a comment"
+"Tune Title"
+"tune inline text"
+"and another tune comment"
+"staff inline text",(I,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
+"staff comment"
+& LA_4 !t
+"staff inline comment in between",(I,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
+"staff comment in between"
+& D_4 !I
+`),
+						Tune: structure.Tune{
+							Header: &structure.TuneHeader{
+								Title: "Tune Title",
+								Comments: []structure.TuneComment{
+									"just a comment",
+									"and another tune comment",
+								},
+								InlineTexts: []structure.TuneInline{
+									"tune inline text",
+								},
+							},
+							Measures: []*structure.Measure{
+								{
+									StaffComments: []structure.StaffComment{
+										"staff comment",
+									},
+									StaffInlineTexts: []structure.StaffInline{
+										"staff inline text",
+									},
+									Symbols: []*structure.MusicSymbol{
+										{
+											Pos:  structure.Position{Line: 11, Column: 2},
+											Text: "LA_4",
+										},
+									},
+								},
+								{
+									StaffComments: []structure.StaffComment{
+										"staff comment in between",
+									},
+									StaffInlineTexts: []structure.StaffInline{
+										"staff inline comment in between",
+									},
+									Symbols: []*structure.MusicSymbol{
+										{
+											Pos:  structure.Position{Line: 16, Column: 3},
+											Text: "D_4",
 										},
 									},
 								},

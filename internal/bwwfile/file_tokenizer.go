@@ -6,6 +6,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/structure"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ var bpDefRegex = regexp.MustCompile(`(Bagpipe Reader|Bagpipe Music Writer Gold|B
 var descRegex = regexp.MustCompile(`"([^"]*)",\(([TYMFI])(,[^,)]+)+\)`)
 var tokenRegex = regexp.MustCompile(`"([^"]*)",\(I(,[^,)]+)+\)|"([^"]*)"|\S+`)
 var commentRegex = regexp.MustCompile(`"([^"]*)"$`)
+var staffEndRegex = regexp.MustCompile(`''!I|!t|!I`)
 
 type Tokenizer struct {
 	state    ParserState
@@ -51,6 +53,7 @@ func (t *Tokenizer) Tokenize(
 		}
 
 		if strings.HasPrefix(trimLine, "&") {
+			allTokens = t.checkAndModifyLastTokensForStaffComments(allTokens)
 			t.state = StaffState
 		}
 
@@ -59,8 +62,9 @@ func (t *Tokenizer) Tokenize(
 			return nil, err
 		}
 
-		if len(tokens) > 0 && tokens[len(tokens)-1].Value == "!t" {
-			// End of stave
+		lastToken := tokens[len(tokens)-1].Value
+		_, ok := lastToken.(structure.StaffEnd)
+		if ok {
 			t.state = FileState
 		}
 
@@ -76,6 +80,38 @@ func (t *Tokenizer) Tokenize(
 	}
 
 	return allTokens, nil
+}
+
+// checkAndModifyLastTokensForStaffComments checks the last tokens for TuneComment and TuneInline
+// types and changes them to StaffComment and StaffInline respectively.
+// As a comment or inline text right before a staff start is considered a staff comment
+// or staff inline text.
+func (t *Tokenizer) checkAndModifyLastTokensForStaffComments(
+	tokens []*common.Token,
+) []*common.Token {
+	comment, inline := false, false
+	for i, tok := range slices.Backward(tokens) {
+		// maximum of 2 lines can be changed when there is a
+		// staff comment and an staff inline text
+		if i < len(tokens)-2 {
+			break
+		}
+
+		switch v := tok.Value.(type) {
+		case structure.TuneComment:
+			if !comment {
+				tokens[i].Value = structure.StaffComment(v)
+				comment = true
+			}
+		case structure.TuneInline:
+			if !inline {
+				tokens[i].Value = structure.StaffInline(v)
+				inline = true
+			}
+		}
+	}
+
+	return tokens
 }
 
 func (t *Tokenizer) getTokensFromLine(
@@ -229,7 +265,7 @@ func (t *Tokenizer) getStaffTokensFromLine(
 			continue
 		}
 
-		if tokStr == "!t" {
+		if staffEndRegex.MatchString(tokStr) {
 			currTok.Value = structure.StaffEnd(tokStr)
 			tokens = append(tokens, currTok)
 			continue

@@ -63,7 +63,8 @@ func getTuneTokens(
 		case structure.BagpipePlayerVersion:
 			// skipped as it is a file related definition
 		case structure.TuneTitle:
-			if len(currTuneTokens) > 0 {
+			if tuneTokensHaveTitle(currTuneTokens) {
+				tuneTokens = append(tuneTokens, currTuneTokens)
 				currTuneTokens = make(TuneTokens, 0)
 			}
 			currTuneTokens = append(currTuneTokens, t)
@@ -77,6 +78,16 @@ func getTuneTokens(
 	}
 
 	return tuneTokens
+}
+
+func tuneTokensHaveTitle(tokens TuneTokens) bool {
+	for _, t := range tokens {
+		if _, ok := t.Value.(structure.TuneTitle); ok {
+			return true
+		}
+	}
+
+	return false
 }
 
 func getTuneFromTokens(
@@ -126,6 +137,12 @@ func getTuneDataFromTokens(
 		case structure.InlineText:
 			t := fmt.Sprintf(structuredTextTemplate, string(v), "I")
 			data = append(data, []byte(" "+t)...)
+		case structure.StaffInline:
+			t := fmt.Sprintf(structuredTextTemplate, string(v), "I")
+			data = append(data, []byte(t+"\n")...)
+		case structure.StaffComment:
+			t := fmt.Sprintf("%#v", v)
+			data = append(data, []byte(t+"\n")...)
 		case structure.InlineComment:
 			t := fmt.Sprintf("%#v", v)
 			data = append(data, []byte(" "+t)...)
@@ -175,12 +192,16 @@ func measuresForTokens(
 			structure.Barline:
 			m = append(m, currMeasure)
 			currMeasure = &structure.Measure{}
+		case structure.StaffInline:
+			currMeasure.StaffInlineTexts = append(currMeasure.StaffInlineTexts, v)
+		case structure.StaffComment:
+			currMeasure.StaffComments = append(currMeasure.StaffComments, v)
 		case structure.InlineComment:
 			if len(currMeasure.Symbols) > 0 {
 				sym := currMeasure.Symbols[len(currMeasure.Symbols)-1]
 				sym.Comments = append(sym.Comments, v)
 			} else {
-				currMeasure.Comments = append(currMeasure.Comments, v)
+				currMeasure.InlineComments = append(currMeasure.InlineComments, v)
 			}
 		case structure.InlineText:
 			if len(currMeasure.Symbols) > 0 {
