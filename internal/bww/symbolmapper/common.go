@@ -19,7 +19,7 @@ var lowPitchesLaToF = []string{"la", "b", "c", "d", "e", "f"}
 
 func newEmbellishment(
 	eType embellishment.Type,
-	args ...interface{},
+	args ...any,
 ) *symbols.Symbol {
 	sym := &symbols.Symbol{
 		Note: &symbols.Note{
@@ -47,7 +47,7 @@ func newEmbellishment(
 
 func newMovement(
 	mType movement.Type,
-	args ...interface{},
+	args ...any,
 ) *symbols.Symbol {
 	sym := &symbols.Symbol{
 		Note: &symbols.Note{

@@ -39,7 +39,6 @@ func newMelodyNotesMap() map[string]*symbols.Symbol {
 	const flagType = "%s%s_%d"
 	for _, p := range pitches {
 		for _, l := range lengthesAll {
-
 			m[fmt.Sprintf(noFlagType, p, l)] = &symbols.Symbol{
 				Note: &symbols.Note{
 					Pitch:  pitchMap[p],
