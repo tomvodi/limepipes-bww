@@ -39,7 +39,7 @@ var _ = Describe("TokenStructureConverter", func() {
 				TuneDefs: []structure.TuneDefinition{
 					{
 						Data: []byte(`Bagpipe Reader:1.0
-"Tune Title"
+"Tune Title",(T,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
 &
 ! !t
 `),
@@ -78,7 +78,7 @@ var _ = Describe("TokenStructureConverter", func() {
 				TuneDefs: []structure.TuneDefinition{
 					{
 						Data: []byte(`Bagpipe Reader:1.0
-"Tune Title"
+"Tune Title",(T,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
 & 4_4
 ! LA_4 !t
 `),
@@ -135,7 +135,7 @@ var _ = Describe("TokenStructureConverter", func() {
 				TuneDefs: []structure.TuneDefinition{
 					{
 						Data: []byte(`Bagpipe Reader:1.0
-"Tune Title"
+"Tune Title",(T,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
 & "measure inline comment",(I,L,0,0,Times New Roman,11,700,0,0,0,0,0,0) 4_4 "symbol inline comment",(I,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
 ! "measure comment" LA_4 "symbol comment" !t
 `),
@@ -209,8 +209,8 @@ var _ = Describe("TokenStructureConverter", func() {
 					{
 						Data: []byte(`Bagpipe Reader:1.0
 "just a comment"
-"Tune Title"
-"tune inline text"
+"Tune Title",(T,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
+"tune inline text",(I,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
 "and another tune comment"
 "staff inline text",(I,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
 "staff comment"
@@ -267,4 +267,137 @@ var _ = Describe("TokenStructureConverter", func() {
 		})
 	})
 
+	When("converting file with two tunes", func() {
+		BeforeEach(func() {
+			tokens = []*common.Token{
+				newToken(structure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+				newToken(structure.TuneTitle("Tune 1 Title"), 2, 0),
+				newToken(structure.StaffStart("&"), 5, 0),
+				newToken("LA_4", 5, 2),
+				newToken(structure.StaffEnd("!t"), 5, 7),
+				newToken(structure.TuneTitle("Tune 2 Title"), 7, 0),
+				newToken(structure.StaffStart("&"), 9, 0),
+				newToken("B_4", 9, 2),
+				newToken(structure.StaffEnd("!t"), 9, 6),
+			}
+		})
+
+		It("should convert the tokens to a BwwFile", func() {
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(bwwFile).Should(BeComparableTo(&structure.BwwFile{
+				BagpipePlayerVersion: "Bagpipe Reader:1.0",
+				TuneDefs: []structure.TuneDefinition{
+					{
+						Data: []byte(`Bagpipe Reader:1.0
+"Tune 1 Title",(T,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
+& LA_4 !t
+`),
+						Tune: structure.Tune{
+							Header: &structure.TuneHeader{
+								Title: "Tune 1 Title",
+							},
+							Measures: []*structure.Measure{
+								{
+									Symbols: []*structure.MusicSymbol{
+										{
+											Pos:  structure.Position{Line: 5, Column: 2},
+											Text: "LA_4",
+										},
+									},
+								},
+							},
+						},
+					},
+					{
+						Data: []byte(`Bagpipe Reader:1.0
+"Tune 2 Title",(T,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
+& B_4 !t
+`),
+						Tune: structure.Tune{
+							Header: &structure.TuneHeader{
+								Title: "Tune 2 Title",
+							},
+							Measures: []*structure.Measure{
+								{
+									Symbols: []*structure.MusicSymbol{
+										{
+											Pos:  structure.Position{Line: 9, Column: 2},
+											Text: "B_4",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}))
+		})
+	})
+
+	When("converting file with two tunes where the first one doesn't have a title", func() {
+		BeforeEach(func() {
+			tokens = []*common.Token{
+				newToken(structure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+				//newToken(structure.TuneTitle("Tune 1 Title"), 2, 0),
+				newToken(structure.StaffStart("&"), 5, 0),
+				newToken("LA_4", 5, 2),
+				newToken(structure.StaffEnd("!t"), 5, 7),
+				newToken(structure.TuneTitle("Tune 2 Title"), 7, 0),
+				newToken(structure.StaffStart("&"), 9, 0),
+				newToken("B_4", 9, 2),
+				newToken(structure.StaffEnd("!t"), 9, 6),
+			}
+		})
+
+		It("should convert the tokens to a BwwFile", func() {
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(bwwFile).Should(BeComparableTo(&structure.BwwFile{
+				BagpipePlayerVersion: "Bagpipe Reader:1.0",
+				TuneDefs: []structure.TuneDefinition{
+					{
+						Data: []byte(`Bagpipe Reader:1.0
+"No Name",(T,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
+& LA_4 !t
+`),
+						Tune: structure.Tune{
+							Header: &structure.TuneHeader{
+								Title: "Tune 1 Title",
+							},
+							Measures: []*structure.Measure{
+								{
+									Symbols: []*structure.MusicSymbol{
+										{
+											Pos:  structure.Position{Line: 5, Column: 2},
+											Text: "LA_4",
+										},
+									},
+								},
+							},
+						},
+					},
+					{
+						Data: []byte(`Bagpipe Reader:1.0
+"Tune 2 Title",(T,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)
+& B_4 !t
+`),
+						Tune: structure.Tune{
+							Header: &structure.TuneHeader{
+								Title: "Tune 2 Title",
+							},
+							Measures: []*structure.Measure{
+								{
+									Symbols: []*structure.MusicSymbol{
+										{
+											Pos:  structure.Position{Line: 9, Column: 2},
+											Text: "B_4",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}))
+		})
+	})
 })

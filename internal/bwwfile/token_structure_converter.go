@@ -114,12 +114,22 @@ func getTuneDataFromTokens(
 	for _, token := range tt {
 		// if token is line token, add a newline character
 		switch v := token.Value.(type) {
-		case structure.TuneTitle,
-			structure.TuneType,
-			structure.TuneComposer,
-			structure.TuneFooter,
-			structure.TuneInline,
-			structure.TuneComment:
+		case structure.TuneTitle:
+			t := fmt.Sprintf(structuredTextTemplate, string(v), "T")
+			data = append(data, []byte(t+"\n")...)
+		case structure.TuneType:
+			t := fmt.Sprintf(structuredTextTemplate, string(v), "Y")
+			data = append(data, []byte(t+"\n")...)
+		case structure.TuneComposer:
+			t := fmt.Sprintf(structuredTextTemplate, string(v), "M")
+			data = append(data, []byte(t+"\n")...)
+		case structure.TuneFooter:
+			t := fmt.Sprintf(structuredTextTemplate, string(v), "F")
+			data = append(data, []byte(t+"\n")...)
+		case structure.TuneInline:
+			t := fmt.Sprintf(structuredTextTemplate, string(v), "I")
+			data = append(data, []byte(t+"\n")...)
+		case structure.TuneComment:
 			t := fmt.Sprintf("%#v", v)
 			data = append(data, []byte(t+"\n")...)
 		case structure.StaffStart:
