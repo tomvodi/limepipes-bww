@@ -1,6 +1,6 @@
 module github.com/tomvodi/limepipes-plugin-bww
 
-go 1.22
+go 1.23
 
 require (
 	github.com/alecthomas/participle/v2 v2.1.1
