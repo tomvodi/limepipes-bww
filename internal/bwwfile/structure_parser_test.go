@@ -5,16 +5,16 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/filestructure"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces/mocks"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/structure"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/utils"
 )
 
 var _ = Describe("StructureParser", func() {
 	utils.SetupConsoleLogger()
 	var err error
-	var bwwFile *structure.BwwFile
+	var bwwFile *filestructure.BwwFile
 	var data []byte
 	var tokens []*common.Token
 	var parser interfaces.StructureParser
@@ -61,7 +61,7 @@ var _ = Describe("StructureParser", func() {
 	})
 
 	When("parsing succeeds", func() {
-		cFile := &structure.BwwFile{
+		cFile := &filestructure.BwwFile{
 			BagpipePlayerVersion: "123",
 		}
 		BeforeEach(func() {

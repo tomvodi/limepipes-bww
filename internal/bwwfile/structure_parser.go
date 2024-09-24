@@ -1,9 +1,8 @@
 package bwwfile
 
 import (
+	"github.com/tomvodi/limepipes-plugin-bww/internal/filestructure"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
-
-	"github.com/tomvodi/limepipes-plugin-bww/internal/structure"
 )
 
 type StructureParser struct {
@@ -13,7 +12,7 @@ type StructureParser struct {
 
 func (t *StructureParser) ParseDocumentStructure(
 	data []byte,
-) (*structure.BwwFile, error) {
+) (*filestructure.BwwFile, error) {
 	tokens, err := t.tokenizer.Tokenize(data)
 	if err != nil {
 		return nil, err

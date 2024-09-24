@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/structure"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/filestructure"
 	"regexp"
 	"slices"
 	"strings"
@@ -63,7 +63,7 @@ func (t *Tokenizer) Tokenize(
 		}
 
 		lastToken := tokens[len(tokens)-1].Value
-		_, ok := lastToken.(structure.StaffEnd)
+		_, ok := lastToken.(filestructure.StaffEnd)
 		if ok {
 			t.state = FileState
 		}
@@ -98,14 +98,14 @@ func (t *Tokenizer) checkAndModifyLastTokensForStaffComments(
 		}
 
 		switch v := tok.Value.(type) {
-		case structure.TuneComment:
+		case filestructure.TuneComment:
 			if !comment {
-				tokens[i].Value = structure.StaffComment(v)
+				tokens[i].Value = filestructure.StaffComment(v)
 				comment = true
 			}
-		case structure.TuneInline:
+		case filestructure.TuneInline:
 			if !inline {
-				tokens[i].Value = structure.StaffInline(v)
+				tokens[i].Value = filestructure.StaffInline(v)
 				inline = true
 			}
 		}
@@ -155,7 +155,7 @@ func (t *Tokenizer) isBagpipeDefinition(text string) *common.Token {
 	}
 	bpDef := text[idx[0]:idx[1]]
 	return &common.Token{
-		Value: structure.BagpipePlayerVersion(bpDef),
+		Value: filestructure.BagpipePlayerVersion(bpDef),
 		Line:  t.currLine,
 		Col:   idx[0],
 	}
@@ -171,19 +171,19 @@ func (t *Tokenizer) isTuneDescription(text string) *common.Token {
 		desc := text[loc[2]:loc[3]]
 		descType := text[loc[4]:loc[5]]
 		if descType == "T" {
-			val = structure.TuneTitle(desc)
+			val = filestructure.TuneTitle(desc)
 		}
 		if descType == "Y" {
-			val = structure.TuneType(desc)
+			val = filestructure.TuneType(desc)
 		}
 		if descType == "M" {
-			val = structure.TuneComposer(desc)
+			val = filestructure.TuneComposer(desc)
 		}
 		if descType == "F" {
-			val = structure.TuneFooter(desc)
+			val = filestructure.TuneFooter(desc)
 		}
 		if descType == "I" {
-			val = structure.TuneInline(desc)
+			val = filestructure.TuneInline(desc)
 		}
 
 		return &common.Token{
@@ -206,7 +206,7 @@ func (t *Tokenizer) isInlineText(text string) *common.Token {
 		desc := text[loc[2]:loc[3]]
 		descType := text[loc[4]:loc[5]]
 		if descType == "I" {
-			val = structure.InlineText(desc)
+			val = filestructure.InlineText(desc)
 		}
 
 		return &common.Token{
@@ -229,12 +229,12 @@ func (t *Tokenizer) isComment(
 	for _, loc := range idx {
 		comment := text[loc[2]:loc[3]]
 		tok := &common.Token{
-			Value: structure.InlineComment(comment),
+			Value: filestructure.InlineComment(comment),
 			Line:  t.currLine,
 			Col:   loc[0],
 		}
 		if t.state == FileState {
-			tok.Value = structure.TuneComment(comment)
+			tok.Value = filestructure.TuneComment(comment)
 		}
 		return tok
 	}
@@ -254,19 +254,19 @@ func (t *Tokenizer) getStaffTokensFromLine(
 		}
 
 		if tokStr == "!" {
-			currTok.Value = structure.Barline(tokStr)
+			currTok.Value = filestructure.Barline(tokStr)
 			tokens = append(tokens, currTok)
 			continue
 		}
 
 		if tokStr == "&" {
-			currTok.Value = structure.StaffStart(tokStr)
+			currTok.Value = filestructure.StaffStart(tokStr)
 			tokens = append(tokens, currTok)
 			continue
 		}
 
 		if staffEndRegex.MatchString(tokStr) {
-			currTok.Value = structure.StaffEnd(tokStr)
+			currTok.Value = filestructure.StaffEnd(tokStr)
 			tokens = append(tokens, currTok)
 			continue
 		}

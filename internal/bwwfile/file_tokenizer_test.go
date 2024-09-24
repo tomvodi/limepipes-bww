@@ -5,7 +5,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/structure"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/filestructure"
 	"io"
 	"os"
 )
@@ -63,17 +63,17 @@ var _ = Describe("FileTokenizer", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(tokens).Should(BeComparableTo(
 				[]*common.Token{
-					newToken(structure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
-					newToken(structure.TuneTitle("Tune Title"), 2, 0),
-					newToken(structure.StaffStart("&"), 4, 0),
+					newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+					newToken(filestructure.TuneTitle("Tune Title"), 2, 0),
+					newToken(filestructure.StaffStart("&"), 4, 0),
 					newToken("4_4", 4, 2),
-					newToken(structure.Barline("!"), 4, 6),
+					newToken(filestructure.Barline("!"), 4, 6),
 					newToken("LA_4", 4, 8),
-					newToken(structure.Barline("!"), 4, 13),
+					newToken(filestructure.Barline("!"), 4, 13),
 					newToken("B_4", 4, 15),
-					newToken(structure.Barline("!"), 4, 19),
+					newToken(filestructure.Barline("!"), 4, 19),
 					newToken("C_4", 4, 21),
-					newToken(structure.StaffEnd("!t"), 4, 25),
+					newToken(filestructure.StaffEnd("!t"), 4, 25),
 				}),
 			)
 		})
@@ -89,21 +89,21 @@ var _ = Describe("FileTokenizer", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(tokens).Should(BeComparableTo(
 				[]*common.Token{
-					newToken(structure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
-					newToken(structure.TuneComment("just a comment"), 2, 0),
-					newToken(structure.TuneTitle("Tune Title"), 4, 0),
-					newToken(structure.TuneInline("tune inline text"), 5, 0),
-					newToken(structure.TuneComment("and another comment"), 6, 0),
-					newToken(structure.StaffInline("staff inline text"), 8, 0),
-					newToken(structure.StaffComment("staff comment"), 9, 0),
-					newToken(structure.StaffStart("&"), 11, 0),
+					newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+					newToken(filestructure.TuneComment("just a comment"), 2, 0),
+					newToken(filestructure.TuneTitle("Tune Title"), 4, 0),
+					newToken(filestructure.TuneInline("tune inline text"), 5, 0),
+					newToken(filestructure.TuneComment("and another comment"), 6, 0),
+					newToken(filestructure.StaffInline("staff inline text"), 8, 0),
+					newToken(filestructure.StaffComment("staff comment"), 9, 0),
+					newToken(filestructure.StaffStart("&"), 11, 0),
 					newToken("LA_4", 11, 2),
-					newToken(structure.StaffEnd("!t"), 11, 7),
-					newToken(structure.StaffInline("staff inline text"), 13, 0),
-					newToken(structure.StaffComment("staff comment"), 14, 0),
-					newToken(structure.StaffStart("&"), 16, 0),
+					newToken(filestructure.StaffEnd("!t"), 11, 7),
+					newToken(filestructure.StaffInline("staff inline text"), 13, 0),
+					newToken(filestructure.StaffComment("staff comment"), 14, 0),
+					newToken(filestructure.StaffStart("&"), 16, 0),
 					newToken("D_4", 16, 3),
-					newToken(structure.StaffEnd("!I"), 16, 7),
+					newToken(filestructure.StaffEnd("!I"), 16, 7),
 				}),
 			)
 		})
@@ -119,16 +119,16 @@ var _ = Describe("FileTokenizer", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(tokens).Should(BeComparableTo(
 				[]*common.Token{
-					newToken(structure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
-					newToken(structure.TuneTitle("Tune Title"), 3, 0),
-					newToken(structure.StaffStart("&"), 6, 0),
-					newToken(structure.InlineComment("comment measure"), 6, 2),
+					newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+					newToken(filestructure.TuneTitle("Tune Title"), 3, 0),
+					newToken(filestructure.StaffStart("&"), 6, 0),
+					newToken(filestructure.InlineComment("comment measure"), 6, 2),
 					newToken("LA_4", 6, 20),
-					newToken(structure.InlineComment("comment symbol"), 6, 25),
-					newToken(structure.Barline("!"), 7, 0),
+					newToken(filestructure.InlineComment("comment symbol"), 6, 25),
+					newToken(filestructure.Barline("!"), 7, 0),
 					newToken("B_4", 7, 2),
-					newToken(structure.InlineText("comment with inline style"), 7, 6),
-					newToken(structure.StaffEnd("!t"), 7, 78),
+					newToken(filestructure.InlineText("comment with inline style"), 7, 6),
+					newToken(filestructure.StaffEnd("!t"), 7, 78),
 				}),
 			)
 		})

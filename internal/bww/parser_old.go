@@ -8,7 +8,9 @@ import (
 type Parser struct {
 }
 
-func (b *Parser) ParseBwwData(data []byte) (musicmodel.MusicModel, error) {
+func (b *Parser) ParseBwwData(
+	data []byte,
+) (musicmodel.MusicModel, error) {
 	parser, err := participle.Build[BwwDocument](
 		participle.Elide("WHITESPACE"),
 		participle.Lexer(BwwLexer),

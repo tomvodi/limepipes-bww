@@ -1,49 +1,44 @@
 package parser
 
 import (
-	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
+	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 )
 
 type Parser struct {
-	fileSplitter    interfaces.BwwFileByTuneSplitter
 	structureParser interfaces.StructureParser
-	gConverter      interfaces.GrammarConverter
+	gConverter      interfaces.StructureToModelConverter
 }
 
-func (p *Parser) ParseBwwData(data []byte) (musicmodel.MusicModel, error) {
-	// 1. Split data by single tunes
-	td, err := p.fileSplitter.SplitFileData(data)
+func (p *Parser) ParseBwwData(
+	data []byte,
+) ([]*messages.ParsedTune, error) {
+	bd, err := p.structureParser.ParseDocumentStructure(data)
 	if err != nil {
 		return nil, err
 	}
 
-	// 2. Parse structure of each tune and convert it into music model
-	var mumo musicmodel.MusicModel
-	for i := range td.TuneTitles() {
-		bd, err := p.structureParser.ParseDocumentStructure(td.Data(i))
+	var pt []*messages.ParsedTune
+	for _, def := range bd.TuneDefs {
+		ct, err := p.gConverter.Convert(def.Tune)
 		if err != nil {
 			return nil, err
 		}
 
-		m, err := p.gConverter.Convert(bd)
-		if err != nil {
-			return nil, err
-		}
-
-		mumo = append(mumo, m...)
+		pt = append(pt, &messages.ParsedTune{
+			Tune:         ct,
+			TuneFileData: def.Data,
+		})
 	}
 
-	return mumo, nil
+	return pt, nil
 }
 
 func New(
-	fileSplitter interfaces.BwwFileByTuneSplitter,
 	structureParser interfaces.StructureParser,
-	gConverter interfaces.GrammarConverter,
+	gConverter interfaces.StructureToModelConverter,
 ) *Parser {
 	return &Parser{
-		fileSplitter:    fileSplitter,
 		structureParser: structureParser,
 		gConverter:      gConverter,
 	}

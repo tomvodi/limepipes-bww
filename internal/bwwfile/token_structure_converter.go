@@ -3,11 +3,11 @@ package bwwfile
 import (
 	"fmt"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/structure"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/filestructure"
 	"strings"
 )
 
-var structuredTextTemplate = "\"%s\",(%s,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)"
+var structuredTextTemplate = "\"%s\",(%s,L,0,0,Times NewConverter Roman,11,700,0,0,0,0,0,0)"
 
 type TuneTokens []*common.Token
 
@@ -16,12 +16,12 @@ type TokenConverter struct {
 
 func (tc *TokenConverter) Convert(
 	tokens []*common.Token,
-) (*structure.BwwFile, error) {
+) (*filestructure.BwwFile, error) {
 	if len(tokens) == 0 {
 		return nil, fmt.Errorf("no tokens to convert")
 	}
 
-	bf := &structure.BwwFile{}
+	bf := &filestructure.BwwFile{}
 	tt := getTuneTokens(tokens)
 
 	bv, err := getBagpipePlayerVersion(tokens)
@@ -31,7 +31,7 @@ func (tc *TokenConverter) Convert(
 	bf.BagpipePlayerVersion = bv
 
 	for _, t := range tt {
-		td := structure.TuneDefinition{}
+		td := filestructure.TuneDefinition{}
 		td.Tune = getTuneFromTokens(t)
 		td.Data = getTuneDataFromTokens(bv, t)
 		bf.TuneDefs = append(bf.TuneDefs, td)
@@ -43,9 +43,9 @@ func (tc *TokenConverter) Convert(
 // getBagpipePlayerVersion returns the first Bagpipe Player Version from the tokens
 func getBagpipePlayerVersion(
 	t []*common.Token,
-) (structure.BagpipePlayerVersion, error) {
+) (filestructure.BagpipePlayerVersion, error) {
 	for _, token := range t {
-		if bp, ok := token.Value.(structure.BagpipePlayerVersion); ok {
+		if bp, ok := token.Value.(filestructure.BagpipePlayerVersion); ok {
 			return bp, nil
 		}
 	}
@@ -60,9 +60,9 @@ func getTuneTokens(
 	var currTuneTokens TuneTokens
 	for _, t := range tokens {
 		switch t.Value.(type) {
-		case structure.BagpipePlayerVersion:
+		case filestructure.BagpipePlayerVersion:
 			// skipped as it is a file related definition
-		case structure.TuneTitle:
+		case filestructure.TuneTitle:
 			if tuneTokensHaveTitle(currTuneTokens) {
 				tuneTokens = append(tuneTokens, currTuneTokens)
 				currTuneTokens = make(TuneTokens, 0)
@@ -82,7 +82,7 @@ func getTuneTokens(
 
 func tuneTokensHaveTitle(tokens TuneTokens) bool {
 	for _, t := range tokens {
-		if _, ok := t.Value.(structure.TuneTitle); ok {
+		if _, ok := t.Value.(filestructure.TuneTitle); ok {
 			return true
 		}
 	}
@@ -92,10 +92,10 @@ func tuneTokensHaveTitle(tokens TuneTokens) bool {
 
 func getTuneFromTokens(
 	tt TuneTokens,
-) structure.Tune {
-	t := structure.Tune{
-		Header:   &structure.TuneHeader{},
-		Measures: make([]*structure.Measure, 0),
+) *filestructure.Tune {
+	t := &filestructure.Tune{
+		Header:   &filestructure.TuneHeader{},
+		Measures: make([]*filestructure.Measure, 0),
 	}
 
 	fillTuneHeader(t.Header, tt)
@@ -106,7 +106,7 @@ func getTuneFromTokens(
 }
 
 func getTuneDataFromTokens(
-	bv structure.BagpipePlayerVersion,
+	bv filestructure.BagpipePlayerVersion,
 	tt TuneTokens,
 ) []byte {
 	data := []byte(bv + "\n")
@@ -114,46 +114,46 @@ func getTuneDataFromTokens(
 	for _, token := range tt {
 		// if token is line token, add a newline character
 		switch v := token.Value.(type) {
-		case structure.TuneTitle:
+		case filestructure.TuneTitle:
 			t := fmt.Sprintf(structuredTextTemplate, string(v), "T")
 			data = append(data, []byte(t+"\n")...)
-		case structure.TuneType:
+		case filestructure.TuneType:
 			t := fmt.Sprintf(structuredTextTemplate, string(v), "Y")
 			data = append(data, []byte(t+"\n")...)
-		case structure.TuneComposer:
+		case filestructure.TuneComposer:
 			t := fmt.Sprintf(structuredTextTemplate, string(v), "M")
 			data = append(data, []byte(t+"\n")...)
-		case structure.TuneFooter:
+		case filestructure.TuneFooter:
 			t := fmt.Sprintf(structuredTextTemplate, string(v), "F")
 			data = append(data, []byte(t+"\n")...)
-		case structure.TuneInline:
+		case filestructure.TuneInline:
 			t := fmt.Sprintf(structuredTextTemplate, string(v), "I")
 			data = append(data, []byte(t+"\n")...)
-		case structure.TuneComment:
+		case filestructure.TuneComment:
 			t := fmt.Sprintf("%#v", v)
 			data = append(data, []byte(t+"\n")...)
-		case structure.StaffStart:
+		case filestructure.StaffStart:
 			t := fmt.Sprintf("%#v", v)
 			t = strings.Trim(t, "\"")
 			data = append(data, []byte(t)...)
-		case structure.StaffEnd:
+		case filestructure.StaffEnd:
 			t := fmt.Sprintf("%#v", v)
 			t = strings.Trim(t, "\"")
 			data = append(data, []byte(" "+t+"\n")...)
-		case structure.Barline:
+		case filestructure.Barline:
 			t := fmt.Sprintf("%#v", v)
 			t = strings.Trim(t, "\"")
 			data = append(data, []byte("\n"+t)...)
-		case structure.InlineText:
+		case filestructure.InlineText:
 			t := fmt.Sprintf(structuredTextTemplate, string(v), "I")
 			data = append(data, []byte(" "+t)...)
-		case structure.StaffInline:
+		case filestructure.StaffInline:
 			t := fmt.Sprintf(structuredTextTemplate, string(v), "I")
 			data = append(data, []byte(t+"\n")...)
-		case structure.StaffComment:
+		case filestructure.StaffComment:
 			t := fmt.Sprintf("%#v", v)
 			data = append(data, []byte(t+"\n")...)
-		case structure.InlineComment:
+		case filestructure.InlineComment:
 			t := fmt.Sprintf("%#v", v)
 			data = append(data, []byte(" "+t)...)
 		default:
@@ -167,53 +167,53 @@ func getTuneDataFromTokens(
 }
 
 func fillTuneHeader(
-	h *structure.TuneHeader,
+	h *filestructure.TuneHeader,
 	tt TuneTokens,
 ) {
 	for _, token := range tt {
 		switch token.Value.(type) {
-		case structure.TuneTitle:
-			h.Title = token.Value.(structure.TuneTitle)
-		case structure.TuneType:
-			h.Type = token.Value.(structure.TuneType)
-		case structure.TuneComposer:
-			h.Composer = token.Value.(structure.TuneComposer)
-		case structure.TuneFooter:
-			h.Footer = token.Value.(structure.TuneFooter)
-		case structure.TuneInline:
-			h.InlineTexts = append(h.InlineTexts, token.Value.(structure.TuneInline))
-		case structure.TuneComment:
-			h.Comments = append(h.Comments, token.Value.(structure.TuneComment))
+		case filestructure.TuneTitle:
+			h.Title = token.Value.(filestructure.TuneTitle)
+		case filestructure.TuneType:
+			h.Type = token.Value.(filestructure.TuneType)
+		case filestructure.TuneComposer:
+			h.Composer = token.Value.(filestructure.TuneComposer)
+		case filestructure.TuneFooter:
+			h.Footer = append(h.Footer, token.Value.(filestructure.TuneFooter))
+		case filestructure.TuneInline:
+			h.InlineTexts = append(h.InlineTexts, token.Value.(filestructure.TuneInline))
+		case filestructure.TuneComment:
+			h.Comments = append(h.Comments, token.Value.(filestructure.TuneComment))
 		}
 	}
 }
 
 func measuresForTokens(
 	tt TuneTokens,
-) []*structure.Measure {
-	var m []*structure.Measure
-	currMeasure := &structure.Measure{}
+) []*filestructure.Measure {
+	var m []*filestructure.Measure
+	currMeasure := &filestructure.Measure{}
 
 	for _, t := range tt {
 		switch v := t.Value.(type) {
-		case structure.StaffStart:
+		case filestructure.StaffStart:
 			// skipped
-		case structure.StaffEnd,
-			structure.Barline:
+		case filestructure.StaffEnd,
+			filestructure.Barline:
 			m = append(m, currMeasure)
-			currMeasure = &structure.Measure{}
-		case structure.StaffInline:
+			currMeasure = &filestructure.Measure{}
+		case filestructure.StaffInline:
 			currMeasure.StaffInlineTexts = append(currMeasure.StaffInlineTexts, v)
-		case structure.StaffComment:
+		case filestructure.StaffComment:
 			currMeasure.StaffComments = append(currMeasure.StaffComments, v)
-		case structure.InlineComment:
+		case filestructure.InlineComment:
 			if len(currMeasure.Symbols) > 0 {
 				sym := currMeasure.Symbols[len(currMeasure.Symbols)-1]
 				sym.Comments = append(sym.Comments, v)
 			} else {
 				currMeasure.InlineComments = append(currMeasure.InlineComments, v)
 			}
-		case structure.InlineText:
+		case filestructure.InlineText:
 			if len(currMeasure.Symbols) > 0 {
 				sym := currMeasure.Symbols[len(currMeasure.Symbols)-1]
 				sym.InlineTexts = append(sym.InlineTexts, v)
@@ -221,8 +221,8 @@ func measuresForTokens(
 				currMeasure.InlineTexts = append(currMeasure.InlineTexts, v)
 			}
 		case string:
-			sym := &structure.MusicSymbol{
-				Pos: structure.Position{
+			sym := &filestructure.MusicSymbol{
+				Pos: filestructure.Position{
 					Line:   t.Line,
 					Column: t.Col,
 				},

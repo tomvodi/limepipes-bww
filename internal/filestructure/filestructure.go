@@ -1,4 +1,4 @@
-package structure
+package filestructure
 
 type BagpipePlayerVersion string
 type TimelineEnd string
@@ -24,7 +24,7 @@ type BwwFile struct {
 
 type TuneDefinition struct {
 	Data []byte
-	Tune Tune
+	Tune *Tune
 }
 
 type Tune struct {
@@ -36,7 +36,7 @@ type TuneHeader struct {
 	Title       TuneTitle
 	Type        TuneType
 	Composer    TuneComposer
-	Footer      TuneFooter
+	Footer      []TuneFooter
 	InlineTexts []TuneInline
 	Comments    []TuneComment
 }

@@ -1,8 +1,8 @@
 package helper
 
 import (
-	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
+	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"regexp"
@@ -12,7 +12,7 @@ import (
 type TuneFixer struct {
 }
 
-func (tf *TuneFixer) Fix(muMo musicmodel.MusicModel) {
+func (tf *TuneFixer) Fix(parsedTunes []*messages.ParsedTune) {
 	for _, t := range muMo {
 		fixComposerArranger(t)
 		fixComposerTrad(t)

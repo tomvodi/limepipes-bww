@@ -1,9 +1,9 @@
 package interfaces
 
 import (
-	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
+	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
 )
 
 type BwwParser interface {
-	ParseBwwData(data []byte) (musicmodel.MusicModel, error)
+	ParseBwwData(data []byte) ([]*messages.ParsedTune, error)
 }
