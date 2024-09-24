@@ -361,7 +361,7 @@ var _ = Describe("TokenStructureConverter", func() {
 `),
 						Tune: &filestructure.Tune{
 							Header: &filestructure.TuneHeader{
-								Title: "Tune 1 Title",
+								Title: "No Name",
 							},
 							Measures: []*filestructure.Measure{
 								{

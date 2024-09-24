@@ -66,6 +66,12 @@ func getTuneTokens(
 			if tuneTokensHaveTitle(currTuneTokens) {
 				tuneTokens = append(tuneTokens, currTuneTokens)
 				currTuneTokens = make(TuneTokens, 0)
+			} else {
+				if tuneTokensHaveStaff(currTuneTokens) {
+					currTuneTokens = prependNoNameTitle(currTuneTokens)
+					tuneTokens = append(tuneTokens, currTuneTokens)
+					currTuneTokens = make(TuneTokens, 0)
+				}
 			}
 			currTuneTokens = append(currTuneTokens, t)
 		default:
@@ -88,6 +94,31 @@ func tuneTokensHaveTitle(tokens TuneTokens) bool {
 	}
 
 	return false
+}
+
+func tuneTokensHaveStaff(tokens TuneTokens) bool {
+	for _, t := range tokens {
+		if _, ok := t.Value.(filestructure.StaffStart); ok {
+			return true
+		}
+	}
+
+	return false
+}
+
+func prependNoNameTitle(
+	tt TuneTokens,
+) TuneTokens {
+	return append(
+		[]*common.Token{
+			{
+				Value: filestructure.TuneTitle("No Name"),
+				Line:  0,
+				Col:   0,
+			},
+		},
+		tt...,
+	)
 }
 
 func getTuneFromTokens(
