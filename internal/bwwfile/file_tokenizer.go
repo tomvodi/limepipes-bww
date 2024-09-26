@@ -22,6 +22,7 @@ var descRegex = regexp.MustCompile(`"([^"]*)",\(([TYMFI])(,[^,)]+)+\)`)
 var tokenRegex = regexp.MustCompile(`"([^"]*)",\(I(,[^,)]+)+\)|"([^"]*)"|\S+`)
 var commentRegex = regexp.MustCompile(`"([^"]*)"$`)
 var staffEndRegex = regexp.MustCompile(`^(''!I|!t|!I)$`)
+var barlineRegex = regexp.MustCompile(`^(!|I!''|I!)$`)
 
 type Tokenizer struct {
 	state    ParserState
@@ -253,7 +254,7 @@ func (t *Tokenizer) getStaffTokensFromLine(
 			Col:  idx[0],
 		}
 
-		if tokStr == "!" {
+		if barlineRegex.MatchString(tokStr) {
 			currTok.Value = filestructure.Barline(tokStr)
 			tokens = append(tokens, currTok)
 			continue

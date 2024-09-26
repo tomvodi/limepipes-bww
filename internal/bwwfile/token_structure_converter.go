@@ -9,6 +9,9 @@ import (
 
 var structuredTextTemplate = "\"%s\",(%s,L,0,0,Times NewConverter Roman,11,700,0,0,0,0,0,0)"
 
+const staffEnd = "!t"
+const simpleBarline = "!"
+
 type TuneTokens []*common.Token
 
 type TokenConverter struct {
@@ -53,6 +56,7 @@ func getBagpipePlayerVersion(
 	return "", fmt.Errorf("no Bagpipe Player Version found")
 }
 
+// getTuneTokens gets the tokens from a file and splits them up into tokens for each tune
 func getTuneTokens(
 	tokens []*common.Token,
 ) []TuneTokens {
@@ -229,10 +233,18 @@ func measuresForTokens(
 		switch v := t.Value.(type) {
 		case filestructure.StaffStart:
 			// skipped
-		case filestructure.StaffEnd,
-			filestructure.Barline:
+		case filestructure.StaffEnd:
+			if v != staffEnd {
+				currMeasure.RightBarline = filestructure.Barline(v)
+			}
 			m = append(m, currMeasure)
 			currMeasure = &filestructure.Measure{}
+		case filestructure.Barline:
+			m = append(m, currMeasure)
+			currMeasure = &filestructure.Measure{}
+			if v != simpleBarline {
+				currMeasure.LeftBarline = v
+			}
 		case filestructure.StaffInline:
 			currMeasure.StaffInlineTexts = append(currMeasure.StaffInlineTexts, v)
 		case filestructure.StaffComment:

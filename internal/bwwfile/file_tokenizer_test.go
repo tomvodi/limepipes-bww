@@ -133,4 +133,34 @@ var _ = Describe("FileTokenizer", func() {
 			)
 		})
 	})
+
+	When("tokenize a file with different barline types", func() {
+		BeforeEach(func() {
+			data = dataFromFile("./testfiles/tune_with_repeats.bww")
+		})
+
+		It("should tokenize the file", func() {
+			printTokens(tokens)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(tokens).Should(BeComparableTo(
+				[]*common.Token{
+					newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+					newToken(filestructure.TuneTitle("Tune Title"), 2, 0),
+					newToken(filestructure.StaffStart("&"), 4, 0),
+					newToken("4_4", 4, 2),
+					newToken(filestructure.Barline("I!''"), 5, 0),
+					newToken("LA_4", 5, 5),
+					newToken(filestructure.Barline("!"), 6, 0),
+					newToken("C_4", 6, 2),
+					newToken(filestructure.StaffEnd("''!I"), 6, 6),
+					newToken(filestructure.StaffStart("&"), 8, 0),
+					newToken(filestructure.Barline("I!"), 9, 0),
+					newToken("B_4", 9, 3),
+					newToken(filestructure.Barline("!"), 10, 0),
+					newToken("E_4", 10, 2),
+					newToken(filestructure.StaffEnd("!I"), 10, 6),
+				}),
+			)
+		})
+	})
 })

@@ -46,6 +46,8 @@ type Measure struct {
 	StaffInlineTexts []StaffInline
 	InlineTexts      []InlineText
 	InlineComments   []InlineComment
+	LeftBarline      Barline
+	RightBarline     Barline
 	Symbols          []*MusicSymbol
 }
 

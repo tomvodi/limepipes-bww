@@ -197,7 +197,7 @@ var _ = Describe("TokenStructureConverter", func() {
 				newToken(filestructure.StaffComment("staff comment in between"), 14, 0),
 				newToken(filestructure.StaffStart("&"), 16, 0),
 				newToken("D_4", 16, 3),
-				newToken(filestructure.StaffEnd("!I"), 16, 7),
+				newToken(filestructure.StaffEnd("!t"), 16, 7),
 			}
 		})
 
@@ -217,7 +217,7 @@ var _ = Describe("TokenStructureConverter", func() {
 & LA_4 !t
 "staff inline comment in between",(I,L,0,0,Times NewConverter Roman,11,700,0,0,0,0,0,0)
 "staff comment in between"
-& D_4 !I
+& D_4 !t
 `),
 						Tune: &filestructure.Tune{
 							Header: &filestructure.TuneHeader{
@@ -323,6 +323,100 @@ var _ = Describe("TokenStructureConverter", func() {
 										{
 											Pos:  filestructure.Position{Line: 9, Column: 2},
 											Text: "B_4",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}))
+		})
+	})
+
+	When("converting file with a tune that has different barlines", func() {
+		BeforeEach(func() {
+			tokens = []*common.Token{
+				newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+				newToken(filestructure.TuneTitle("Tune Title"), 2, 0),
+				newToken(filestructure.StaffStart("&"), 4, 0),
+				newToken("4_4", 4, 2),
+				newToken(filestructure.Barline("I!''"), 5, 0),
+				newToken("LA_4", 5, 5),
+				newToken(filestructure.Barline("!"), 6, 0),
+				newToken("C_4", 6, 2),
+				newToken(filestructure.StaffEnd("''!I"), 6, 6),
+				newToken(filestructure.StaffStart("&"), 8, 0),
+				newToken(filestructure.Barline("I!"), 9, 0),
+				newToken("B_4", 9, 3),
+				newToken(filestructure.Barline("!"), 10, 0),
+				newToken("E_4", 10, 2),
+				newToken(filestructure.StaffEnd("!I"), 10, 6),
+			}
+		})
+
+		It("should convert the tokens to a BwwFile", func() {
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(bwwFile).Should(BeComparableTo(&filestructure.BwwFile{
+				BagpipePlayerVersion: "Bagpipe Reader:1.0",
+				TuneDefs: []filestructure.TuneDefinition{
+					{
+						Data: []byte(`Bagpipe Reader:1.0
+"Tune Title",(T,L,0,0,Times NewConverter Roman,11,700,0,0,0,0,0,0)
+& 4_4
+I!'' LA_4
+! C_4 ''!I
+&
+I! B_4
+! E_4 !I
+`),
+						Tune: &filestructure.Tune{
+							Header: &filestructure.TuneHeader{
+								Title: "Tune Title",
+							},
+							Measures: []*filestructure.Measure{
+								{
+									Symbols: []*filestructure.MusicSymbol{
+										{
+											Pos:  filestructure.Position{Line: 4, Column: 2},
+											Text: "4_4",
+										},
+									},
+								},
+								{
+									LeftBarline: "I!''",
+									Symbols: []*filestructure.MusicSymbol{
+										{
+											Pos:  filestructure.Position{Line: 5, Column: 5},
+											Text: "LA_4",
+										},
+									},
+								},
+								{
+									RightBarline: "''!I",
+									Symbols: []*filestructure.MusicSymbol{
+										{
+											Pos:  filestructure.Position{Line: 6, Column: 2},
+											Text: "C_4",
+										},
+									},
+								},
+								{},
+								{
+									LeftBarline: "I!",
+									Symbols: []*filestructure.MusicSymbol{
+										{
+											Pos:  filestructure.Position{Line: 9, Column: 3},
+											Text: "B_4",
+										},
+									},
+								},
+								{
+									RightBarline: "!I",
+									Symbols: []*filestructure.MusicSymbol{
+										{
+											Pos:  filestructure.Position{Line: 10, Column: 2},
+											Text: "E_4",
 										},
 									},
 								},
