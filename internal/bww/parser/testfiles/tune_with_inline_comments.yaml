@@ -1,21 +1,23 @@
 - title: Tune Title
   comments:
-    - and another comment
+  - just a comment which is a tune comment before the tune
+  - and another tune comment
   inline_text:
-    - tune inline text
-  tempo: 0
+  - tune inline text
   measures:
-    - symbols:
-        - note:
-            pitch: LowA
-            length: Quarter
-    - right_barline:
-        type: Heavy
-      symbols:
-        - note:
-            pitch: D
-            length: Quarter
-      comments:
-        - stave comment
-      inline_text:
-        - stave inline text
+  - symbols:
+    - note:
+        pitch: LowA
+        length: Quarter
+    comments:
+    - staff 1 comment
+    inline_text:
+    - staff 1 inline text
+  - symbols:
+    - note:
+        pitch: D
+        length: Quarter
+    comments:
+    - staff 2 comment
+    inline_text:
+    - staff 2 inline text
