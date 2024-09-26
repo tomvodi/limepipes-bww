@@ -156,12 +156,17 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/embellishment_without_following_note.bww"
 			testFileExpect = "./testfiles/embellishment_without_following_note.yaml"
-			//exportToYaml(musicTunesBww, "./testfiles/embellishment_without_following_note.yaml")
+
+		})
+
+		JustBeforeEach(func() {
+			exportToYaml(musicTunesBww, "./testfiles/embellishment_without_following_note.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).To(Equal(musicTunesExpect))
+			Expect(musicTunesBww).Should(
+				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -209,6 +214,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/accidentals.bww"
 			testFileExpect = "./testfiles/accidentals.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/accidentals.yaml")
 		})
 
@@ -223,7 +231,10 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/doublings.bww"
 			testFileExpect = "./testfiles/doublings.yaml"
-			//exportToYaml(musicTunesBww, "./testfiles/.yaml")
+		})
+
+		JustBeforeEach(func() {
+			//exportToYaml(musicTunesBww, "./testfiles/doublings.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
@@ -237,7 +248,10 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/grips.bww"
 			testFileExpect = "./testfiles/grips.yaml"
-			//exportToYaml(musicTunesBww, "./testfiles/.yaml")
+		})
+
+		JustBeforeEach(func() {
+			//exportToYaml(musicTunesBww, "./testfiles/grips.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
@@ -264,6 +278,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/bubblys.bww"
 			testFileExpect = "./testfiles/bubblys.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/bubblys.yaml")
 		})
 
@@ -278,6 +295,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/throwds.bww"
 			testFileExpect = "./testfiles/throwds.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/throwds.yaml")
 		})
 
@@ -292,6 +312,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/birls.bww"
 			testFileExpect = "./testfiles/birls.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/birls.yaml")
 		})
 
@@ -306,6 +329,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/strikes.bww"
 			testFileExpect = "./testfiles/strikes.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/strikes.yaml")
 		})
 
@@ -320,6 +346,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/peles.bww"
 			testFileExpect = "./testfiles/peles.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/peles.yaml")
 		})
 
@@ -334,6 +363,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/double_strikes.bww"
 			testFileExpect = "./testfiles/double_strikes.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/double_strikes.yaml")
 		})
 
@@ -348,6 +380,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/triple_strikes.bww"
 			testFileExpect = "./testfiles/triple_strikes.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/triple_strikes.yaml")
 		})
 
@@ -362,6 +397,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/double_grace.bww"
 			testFileExpect = "./testfiles/double_grace.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/double_grace.yaml")
 		})
 
@@ -376,6 +414,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/ties.bww"
 			testFileExpect = "./testfiles/ties.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/ties.yaml")
 		})
 
@@ -391,6 +432,9 @@ var _ = Describe("BWW Parser", func() {
 			Skip("Parser does not support old format styles")
 			testFile = "./testfiles/ties_old_with_errors.bww"
 			testFileExpect = "./testfiles/ties_old_with_errors.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/ties_old_with_errors.yaml")
 		})
 
@@ -435,6 +479,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/irregular_groups.bww"
 			testFileExpect = "./testfiles/irregular_groups.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/irregular_groups.yaml")
 		})
 
@@ -464,6 +511,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/time_lines.bww"
 			testFileExpect = "./testfiles/time_lines.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/time_lines.yaml")
 		})
 
@@ -478,6 +528,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/space.bww"
 			testFileExpect = "./testfiles/space.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/space.yaml")
 		})
 
@@ -492,6 +545,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/tune_with_inline_comments.bww"
 			testFileExpect = "./testfiles/tune_with_inline_comments.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/tune_with_inline_comments.yaml")
 		})
 
@@ -506,6 +562,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/two_tunes.bww"
 			testFileExpect = "./testfiles/two_tunes.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/two_tunes.yaml")
 		})
 
@@ -520,6 +579,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/single_tune_comment_does_not_appear_in_first_measure.bww"
 			testFileExpect = "./testfiles/single_tune_comment_does_not_appear_in_first_measure.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/single_tune_comment_does_not_appear_in_first_measure.yaml")
 		})
 
@@ -534,6 +596,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/first_tune_no_title.bww"
 			testFileExpect = "./testfiles/first_tune_no_title.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/first_tune_no_title.yaml")
 		})
 
@@ -548,6 +613,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/tune_with_no_staff_ending_before_next_staff.bww"
 			testFileExpect = "./testfiles/tune_with_no_staff_ending_before_next_staff.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/tune_with_no_staff_ending_before_next_staff.yaml")
 		})
 
@@ -565,6 +633,10 @@ var _ = Describe("BWW Parser", func() {
 			//exportToYaml(musicTunesBww, "./testfiles/tune_staff_ends_with_eof.yaml")
 		})
 
+		JustBeforeEach(func() {
+			//exportToYaml(musicTunesBww, "./testfiles/tune_staff_ends_with_eof.yaml")
+		})
+
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
@@ -576,6 +648,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/tune_with_missing_parameter_in_list.bww"
 			testFileExpect = "./testfiles/tune_with_missing_parameter_in_list.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/tune_with_missing_parameter_in_list.yaml")
 		})
 
@@ -593,6 +668,10 @@ var _ = Describe("BWW Parser", func() {
 			//exportToYaml(musicTunesBww, "./testfiles/tune_with_multiple_bagpipe_reader_version_definitions.yaml")
 		})
 
+		JustBeforeEach(func() {
+			//exportToYaml(musicTunesBww, "./testfiles/tune_with_multiple_bagpipe_reader_version_definitions.yaml")
+		})
+
 		It("should have parsed file correctly", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(musicTunesBww).Should(
@@ -604,6 +683,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/tune_with_symbol_comment.bww"
 			testFileExpect = "./testfiles/tune_with_symbol_comment.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/tune_with_symbol_comment.yaml")
 		})
 
@@ -618,6 +700,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/tune_with_time_line_end_after_staff_end.bww"
 			testFileExpect = "./testfiles/tune_with_time_line_end_after_staff_end.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/tune_with_time_line_end_after_staff_end.yaml")
 		})
 
@@ -632,6 +717,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/tunetempo_inline.bww"
 			testFileExpect = "./testfiles/tunetempo_inline.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/tunetempo_inline.yaml")
 		})
 
@@ -646,6 +734,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/pio_throws_and_doublings.bww"
 			testFileExpect = "./testfiles/pio_throws_and_doublings.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/pio_throws_and_doublings.yaml")
 		})
 

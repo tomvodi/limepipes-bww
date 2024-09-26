@@ -3,9 +3,12 @@
 package bww
 
 import (
+	"errors"
+	"fmt"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/measure"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/filestructure"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 )
@@ -22,7 +25,10 @@ func (c *Converter) Convert(
 
 	for _, m := range fst.Measures {
 		meas := &measure.Measure{}
-		fillMeasure(meas, m)
+		err := c.fillMeasure(meas, m)
+		if err != nil {
+			return nil, err
+		}
 		t.Measures = append(t.Measures, meas)
 	}
 
@@ -36,42 +42,150 @@ func fillTuneWithHeader(
 	t.Title = string(h.Title)
 	t.Type = string(h.Type)
 	t.Composer = string(h.Composer)
-	t.Footer = make([]string, len(h.Footer))
-	for i, f := range h.Footer {
-		t.Footer[i] = string(f)
+
+	if len(h.Footer) > 0 {
+		t.Footer = make([]string, len(h.Footer))
+		for i, f := range h.Footer {
+			t.Footer[i] = string(f)
+		}
 	}
-	t.InlineText = make([]string, len(h.InlineTexts))
-	for i, it := range h.InlineTexts {
-		t.InlineText[i] = string(it)
+
+	if len(h.InlineTexts) > 0 {
+		t.InlineText = make([]string, len(h.InlineTexts))
+		for i, it := range h.InlineTexts {
+			t.InlineText[i] = string(it)
+		}
 	}
-	t.Comments = make([]string, len(h.Comments))
-	for i, c := range h.Comments {
-		t.Comments[i] = string(c)
+
+	if len(h.Comments) > 0 {
+		t.Comments = make([]string, len(h.Comments))
+		for i, c := range h.Comments {
+			t.Comments[i] = string(c)
+		}
 	}
 }
 
-func fillMeasure(
-	d *measure.Measure,
-	s *filestructure.Measure,
+func (c *Converter) fillMeasure(
+	dest *measure.Measure,
+	src *filestructure.Measure,
+) error {
+	fillInlineTextAndComments(dest, src)
+
+	if len(src.Symbols) == 0 {
+		return nil
+	}
+
+	for _, s := range src.Symbols {
+		if c.mapper.IsTimeSignature(s.Text) {
+			ts, err := c.mapper.TimeSigForToken(s.Text)
+			if err != nil {
+				return err
+			}
+			dest.Time = ts
+			continue
+		}
+
+		sym, err := c.convertSymbol(s)
+		if err != nil {
+			return err
+		}
+
+		prevSym := dest.LastSymbol()
+		if prevSym != nil && prevSym.CanBeMergedWith(sym) {
+			prevSym.MergeWith(sym)
+			continue
+		}
+
+		dest.Symbols = append(dest.Symbols, sym)
+	}
+
+	return nil
+}
+
+func fillInlineTextAndComments(
+	dest *measure.Measure,
+	src *filestructure.Measure,
 ) {
-	d.InlineText = make([]string, len(s.InlineTexts))
-	for i, it := range s.InlineTexts {
-		d.InlineText[i] = string(it)
+	addInlineTexts(dest, toStringSlice[filestructure.InlineText](src.InlineTexts))
+	addInlineTexts(dest, toStringSlice[filestructure.StaffInline](src.StaffInlineTexts))
+
+	addComments(dest, toStringSlice[filestructure.InlineComment](src.InlineComments))
+	addComments(dest, toStringSlice[filestructure.StaffComment](src.StaffComments))
+}
+
+type MeasureText interface {
+	filestructure.InlineText |
+		filestructure.InlineComment |
+		filestructure.StaffInline |
+		filestructure.StaffComment
+}
+
+func toStringSlice[T MeasureText](
+	texts []T,
+) []string {
+	if len(texts) == 0 {
+		return nil
 	}
-	d.Comments = make([]string, len(s.InlineComments))
-	for i, c := range s.InlineComments {
-		d.Comments[i] = string(c)
+
+	strs := make([]string, len(texts))
+	for i, t := range texts {
+		strs[i] = string(t)
 	}
-	d.Symbols = make([]*symbols.Symbol, len(s.Symbols))
-	for i, s := range s.Symbols {
-		sym := convertSymbol(s)
-		d.Symbols[i] = sym
+
+	return strs
+}
+
+func addInlineTexts(
+	staff *measure.Measure,
+	texts []string,
+) {
+	if len(texts) == 0 {
+		return
+	}
+
+	if len(staff.InlineText) == 0 {
+		staff.InlineText = make([]string, 0)
+	}
+
+	for _, it := range texts {
+		staff.InlineText = append(staff.InlineText, it)
 	}
 }
 
-func convertSymbol(d *filestructure.MusicSymbol) *symbols.Symbol {
-	s := &symbols.Symbol{}
-	return s
+func addComments(
+	staff *measure.Measure,
+	texts []string,
+) {
+	if len(texts) == 0 {
+		return
+	}
+
+	if len(staff.Comments) == 0 {
+		staff.Comments = make([]string, 0)
+	}
+
+	for _, it := range texts {
+		staff.Comments = append(staff.Comments, it)
+	}
+}
+
+func (c *Converter) convertSymbol(
+	ms *filestructure.MusicSymbol,
+) (*symbols.Symbol, error) {
+	sym, err := c.mapper.SymbolForToken(ms.Text)
+	if errors.Is(err, common.ErrSymbolNotFound) {
+		return nil, fmt.Errorf(
+			"symbol %s not found: line %d, column %d",
+			ms.Text,
+			ms.Pos.Line,
+			ms.Pos.Column,
+		)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return sym, nil
 }
 
 /*
