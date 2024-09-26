@@ -21,7 +21,7 @@ var bpDefRegex = regexp.MustCompile(`(Bagpipe Reader|Bagpipe Music Writer Gold|B
 var descRegex = regexp.MustCompile(`"([^"]*)",\(([TYMFI])(,[^,)]+)+\)`)
 var tokenRegex = regexp.MustCompile(`"([^"]*)",\(I(,[^,)]+)+\)|"([^"]*)"|\S+`)
 var commentRegex = regexp.MustCompile(`"([^"]*)"$`)
-var staffEndRegex = regexp.MustCompile(`''!I|!t|!I`)
+var staffEndRegex = regexp.MustCompile(`^(''!I|!t|!I)$`)
 
 type Tokenizer struct {
 	state    ParserState
