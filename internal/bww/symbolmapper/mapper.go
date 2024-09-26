@@ -34,6 +34,11 @@ func (m *Mapper) SymbolForToken(token string) (*symbols.Symbol, error) {
 	if !ok {
 		return nil, common.ErrSymbolNotFound
 	}
+	// If nil symbol is found, Symbols should be skipped
+	if sym == nil {
+		return nil, common.ErrSymbolSkip
+	}
+
 	symCopy := &symbols.Symbol{}
 	err := copier.Copy(symCopy, sym)
 	if err != nil {

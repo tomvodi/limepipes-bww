@@ -1,6 +1,4 @@
 - title: Tune Title
-  comments:
-    - undocumented feature having a space symbol
   tempo: 0
   measures:
     - symbols:
@@ -10,3 +8,5 @@
         - note:
             pitch: LowA
             length: Quarter
+      comments:
+        - undocumented feature having a space symbol

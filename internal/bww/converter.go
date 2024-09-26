@@ -86,6 +86,10 @@ func (c *Converter) fillMeasure(
 		}
 
 		sym, err := c.convertSymbol(s)
+		if errors.Is(err, common.ErrSymbolSkip) {
+			continue
+		}
+
 		if err != nil {
 			return err
 		}
@@ -115,9 +119,9 @@ func fillInlineTextAndComments(
 
 type MeasureText interface {
 	filestructure.InlineText |
-		filestructure.InlineComment |
-		filestructure.StaffInline |
-		filestructure.StaffComment
+	filestructure.InlineComment |
+	filestructure.StaffInline |
+	filestructure.StaffComment
 }
 
 func toStringSlice[T MeasureText](
