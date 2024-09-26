@@ -25,7 +25,6 @@ func (tc *TokenConverter) Convert(
 	}
 
 	bf := &filestructure.BwwFile{}
-	tt := getTuneTokens(tokens)
 
 	bv, err := getBagpipePlayerVersion(tokens)
 	if err != nil {
@@ -33,6 +32,7 @@ func (tc *TokenConverter) Convert(
 	}
 	bf.BagpipePlayerVersion = bv
 
+	tt := getTuneTokens(tokens)
 	for _, t := range tt {
 		td := filestructure.TuneDefinition{}
 		td.Tune = getTuneFromTokens(t)
@@ -84,6 +84,9 @@ func getTuneTokens(
 	}
 
 	if len(currTuneTokens) > 0 {
+		if !tuneTokensHaveTitle(currTuneTokens) {
+			currTuneTokens = prependNoNameTitle(currTuneTokens)
+		}
 		tuneTokens = append(tuneTokens, currTuneTokens)
 	}
 

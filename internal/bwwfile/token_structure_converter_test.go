@@ -428,11 +428,51 @@ I! B_4
 		})
 	})
 
+	When("converting file with one tune which doesn't have a title", func() {
+		BeforeEach(func() {
+			tokens = []*common.Token{
+				newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+				newToken(filestructure.StaffStart("&"), 5, 0),
+				newToken("LA_4", 5, 2),
+				newToken(filestructure.StaffEnd("!t"), 5, 7),
+			}
+		})
+
+		It("should convert the tokens to a BwwFile", func() {
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(bwwFile).Should(BeComparableTo(&filestructure.BwwFile{
+				BagpipePlayerVersion: "Bagpipe Reader:1.0",
+				TuneDefs: []filestructure.TuneDefinition{
+					{
+						Data: []byte(`Bagpipe Reader:1.0
+"No Name",(T,L,0,0,Times NewConverter Roman,11,700,0,0,0,0,0,0)
+& LA_4 !t
+`),
+						Tune: &filestructure.Tune{
+							Header: &filestructure.TuneHeader{
+								Title: "No Name",
+							},
+							Measures: []*filestructure.Measure{
+								{
+									Symbols: []*filestructure.MusicSymbol{
+										{
+											Pos:  filestructure.Position{Line: 5, Column: 2},
+											Text: "LA_4",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}))
+		})
+	})
+
 	When("converting file with two tunes where the first one doesn't have a title", func() {
 		BeforeEach(func() {
 			tokens = []*common.Token{
 				newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
-				//newToken(structure.TuneTitle("Tune 1 Title"), 2, 0),
 				newToken(filestructure.StaffStart("&"), 5, 0),
 				newToken("LA_4", 5, 2),
 				newToken(filestructure.StaffEnd("!t"), 5, 7),

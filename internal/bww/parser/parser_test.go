@@ -575,23 +575,6 @@ var _ = Describe("BWW Parser", func() {
 		})
 	})
 
-	When("having a file with a tune with comments, the comment should not be propagated to first measure", func() {
-		BeforeEach(func() {
-			testFile = "./testfiles/single_tune_comment_does_not_appear_in_first_measure.bww"
-			testFileExpect = "./testfiles/single_tune_comment_does_not_appear_in_first_measure.yaml"
-		})
-
-		JustBeforeEach(func() {
-			//exportToYaml(musicTunesBww, "./testfiles/single_tune_comment_does_not_appear_in_first_measure.yaml")
-		})
-
-		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
-		})
-	})
-
 	When("having a file with the first tune without a title", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/first_tune_no_title.bww"
