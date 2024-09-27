@@ -5,4 +5,4 @@ Bagpipe Reader:1.0
 
 
 & "comment measure" LA_4 "comment symbol"
-! B_4 "comment with inline style",(I,L,0,0,Times New Roman,11,700,0,0,0,0,0,0)!t
+! B_4 "comment with inline style",(I,L,0,0,Times New Roman,11,700,0,0,0,0,0,0) !t
