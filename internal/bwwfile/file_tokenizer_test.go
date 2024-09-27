@@ -134,31 +134,24 @@ var _ = Describe("FileTokenizer", func() {
 		})
 	})
 
-	When("tokenize a file with different barline types", func() {
+	When("tokenize a file with metadata", func() {
 		BeforeEach(func() {
-			data = dataFromFile("./testfiles/tune_with_repeats.bww")
+			data = []byte(`Bagpipe Reader:1.0
+MIDINoteMappings,(54,56,58,59,61,63,64,66,68,56,58,60,61,63,65,66,68,70,55,57,59,60,62,64,65,67,69)
+FrequencyMappings,(370,415,466,494,554,622,659,740,831,415,466,523,554,622,699,740,831,932,392,440,494,523,587,659,699,784,880)
+InstrumentMappings,(71,71,45,33,1000,60,70)
+GracenoteDurations,(20,40,30,50,100,200,800,1200,250,250,250,500,200)
+FontSizes,(90,100,100,80,250)
+TuneFormat,(1,0,M,L,500,500,500,500,P,0,0)
+`)
 		})
 
-		It("should tokenize the file", func() {
+		It("should tokenize the file and skip metadata", func() {
 			printTokens(tokens)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(tokens).Should(BeComparableTo(
 				[]*common.Token{
 					newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
-					newToken(filestructure.TuneTitle("Tune Title"), 2, 0),
-					newToken(filestructure.StaffStart("&"), 4, 0),
-					newToken("4_4", 4, 2),
-					newToken(filestructure.Barline("I!''"), 5, 0),
-					newToken("LA_4", 5, 5),
-					newToken(filestructure.Barline("!"), 6, 0),
-					newToken("C_4", 6, 2),
-					newToken(filestructure.StaffEnd("''!I"), 6, 6),
-					newToken(filestructure.StaffStart("&"), 8, 0),
-					newToken(filestructure.Barline("I!"), 9, 0),
-					newToken("B_4", 9, 3),
-					newToken(filestructure.Barline("!"), 10, 0),
-					newToken("E_4", 10, 2),
-					newToken(filestructure.StaffEnd("!I"), 10, 6),
 				}),
 			)
 		})

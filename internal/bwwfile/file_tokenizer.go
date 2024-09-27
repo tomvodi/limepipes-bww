@@ -1,6 +1,7 @@
 package bwwfile
 
 import (
+	"errors"
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
@@ -23,6 +24,7 @@ var tokenRegex = regexp.MustCompile(`"([^"]*)",\(I(,[^,)]+)+\)|"([^"]*)"|\S+`)
 var commentRegex = regexp.MustCompile(`"([^"]*)"$`)
 var staffEndRegex = regexp.MustCompile(`^(''!I|!t|!I)$`)
 var barlineRegex = regexp.MustCompile(`^(!|I!''|I!)$`)
+var metaRegex = regexp.MustCompile(`^(MIDINoteMappings|FrequencyMappings|InstrumentMappings|GracenoteDurations|FontSizes|TuneFormat)`)
 
 type Tokenizer struct {
 	state    ParserState
@@ -59,6 +61,10 @@ func (t *Tokenizer) Tokenize(
 		}
 
 		tokens, err := t.getTokensFromLine(line)
+		if errors.Is(err, common.ErrLineSkip) {
+			t.currLine++
+			continue
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -144,6 +150,10 @@ func (t *Tokenizer) getFileTokensFromLine(
 	comment := t.isComment(line)
 	if comment != nil {
 		return []*common.Token{comment}, nil
+	}
+
+	if t.isMetaData(line) {
+		return nil, common.ErrLineSkip
 	}
 
 	return nil, fmt.Errorf("no file token found for line: '%s'", line)
@@ -241,6 +251,13 @@ func (t *Tokenizer) isComment(
 	}
 
 	return nil
+}
+
+func (t *Tokenizer) isMetaData(
+	text string,
+) bool {
+	trimmed := strings.TrimSpace(text)
+	return metaRegex.MatchString(trimmed)
 }
 
 func (t *Tokenizer) getStaffTokensFromLine(
