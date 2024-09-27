@@ -19,7 +19,7 @@ const (
 )
 
 var bpDefRegex = regexp.MustCompile(`(Bagpipe Reader|Bagpipe Music Writer Gold|Bagpipe Musicworks Gold):\d+\.\d+`)
-var descRegex = regexp.MustCompile(`"([^"]*)",\(([TYMFI])(,[^,)]+)+\)`)
+var descRegex = regexp.MustCompile(`"([^"]*)",\(([TYMFI])[^)\n]+\)`)
 var tokenRegex = regexp.MustCompile(`"([^"]*)",\(I(,[^,)]+)+\)|"([^"]*)"|\S+`)
 var commentRegex = regexp.MustCompile(`"([^"]*)"$`)
 var staffEndRegex = regexp.MustCompile(`^(''!I|!t|!I)$`)
