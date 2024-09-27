@@ -690,9 +690,8 @@ var _ = Describe("BWW Parser", func() {
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("staff end token is not at the end of line 5"))
 		})
 	})
 

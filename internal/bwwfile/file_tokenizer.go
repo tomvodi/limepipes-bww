@@ -60,7 +60,7 @@ func (t *Tokenizer) Tokenize(
 			t.state = StaffState
 		}
 
-		tokens, err := t.getTokensFromLine(line)
+		lineTokens, err := t.getTokensFromLine(line)
 		if errors.Is(err, common.ErrLineSkip) {
 			t.currLine++
 			continue
@@ -69,13 +69,11 @@ func (t *Tokenizer) Tokenize(
 			return nil, err
 		}
 
-		lastToken := tokens[len(tokens)-1].Value
-		_, ok := lastToken.(filestructure.StaffEnd)
-		if ok {
+		if lastTokenIsStaffEnd(lineTokens) {
 			t.state = FileState
 		}
 
-		allTokens = append(allTokens, tokens...)
+		allTokens = append(allTokens, lineTokens...)
 
 		t.currLine++
 	}
@@ -87,6 +85,27 @@ func (t *Tokenizer) Tokenize(
 	}
 
 	return allTokens, nil
+}
+
+// lastTokenIsStaffEnd checks if the last token in the slice is a StaffEnd token.
+func lastTokenIsStaffEnd(tokens TuneTokens) bool {
+	if len(tokens) == 0 {
+		return false
+	}
+
+	lastToken := tokens[len(tokens)-1].Value
+	_, lastTokenIsStaffEnd := lastToken.(filestructure.StaffEnd)
+	return lastTokenIsStaffEnd
+}
+
+func containsStaffEnd(tokens []*common.Token) bool {
+	for _, tok := range tokens {
+		if _, ok := tok.Value.(filestructure.StaffEnd); ok {
+			return true
+		}
+	}
+
+	return false
 }
 
 // checkAndModifyLastTokensForStaffComments checks the last tokens for TuneComment and TuneInline
@@ -128,7 +147,16 @@ func (t *Tokenizer) getTokensFromLine(
 	case FileState:
 		return t.getFileTokensFromLine(line)
 	case StaffState:
-		return t.getStaffTokensFromLine(line)
+		tokens, err := t.getStaffTokensFromLine(line)
+		if err != nil {
+			return nil, err
+		}
+
+		if containsStaffEnd(tokens) && !lastTokenIsStaffEnd(tokens) {
+			return nil, fmt.Errorf("staff end token is not at the end of line %d", t.currLine)
+		}
+
+		return tokens, nil
 	default:
 		panic("tokenizer: unhandled parser state")
 	}
