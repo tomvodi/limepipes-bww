@@ -235,7 +235,11 @@ func measuresForTokens(
 	for _, t := range tt {
 		switch v := t.Value.(type) {
 		case filestructure.StaffStart:
-			// skipped
+			// a new staff started though the current staff wasn't finished
+			if len(currMeasure.Symbols) > 0 {
+				m = append(m, currMeasure)
+				currMeasure = &filestructure.Measure{}
+			}
 		case filestructure.StaffEnd:
 			if v != staffEnd {
 				currMeasure.RightBarline = filestructure.Barline(v)
