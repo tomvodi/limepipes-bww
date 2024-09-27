@@ -5,6 +5,7 @@ package bww
 import (
 	"errors"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/measure"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
@@ -70,6 +71,7 @@ func (c *Converter) fillMeasure(
 	src *filestructure.Measure,
 ) error {
 	fillInlineTextAndComments(dest, src)
+	c.setBarlines(dest, src)
 
 	if len(src.Symbols) == 0 {
 		return nil
@@ -115,6 +117,44 @@ func fillInlineTextAndComments(
 
 	addComments(dest, toStringSlice[filestructure.InlineComment](src.InlineComments))
 	addComments(dest, toStringSlice[filestructure.StaffComment](src.StaffComments))
+}
+
+func (c *Converter) setBarlines(
+	dest *measure.Measure,
+	src *filestructure.Measure,
+) error {
+	if src.LeftBarline != "" {
+		bl, err := c.mapper.BarlineForToken(string(src.LeftBarline))
+		if errors.Is(err, common.ErrSymbolNotFound) {
+			log.Fatal().Msgf(
+				"barline %s not found",
+				src.LeftBarline,
+			)
+		}
+		if err != nil {
+			return err
+		}
+
+		dest.LeftBarline = bl
+	}
+
+	if src.RightBarline == "" {
+		return nil
+	}
+
+	bl, err := c.mapper.BarlineForToken(string(src.RightBarline))
+	if errors.Is(err, common.ErrSymbolNotFound) {
+		log.Fatal().Msgf(
+			"barline %s not found",
+			src.RightBarline,
+		)
+	}
+	if err != nil {
+		return err
+	}
+	dest.RightBarline = bl
+
+	return nil
 }
 
 type MeasureText interface {

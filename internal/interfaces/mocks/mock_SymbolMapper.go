@@ -3,8 +3,11 @@
 package mocks
 
 import (
-	mock "github.com/stretchr/testify/mock"
+	barline "github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/barline"
+
 	measure "github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/measure"
+
+	mock "github.com/stretchr/testify/mock"
 
 	symbols "github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols"
 )
@@ -20,6 +23,64 @@ type SymbolMapper_Expecter struct {
 
 func (_m *SymbolMapper) EXPECT() *SymbolMapper_Expecter {
 	return &SymbolMapper_Expecter{mock: &_m.Mock}
+}
+
+// BarlineForToken provides a mock function with given fields: token
+func (_m *SymbolMapper) BarlineForToken(token string) (*barline.Barline, error) {
+	ret := _m.Called(token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for BarlineForToken")
+	}
+
+	var r0 *barline.Barline
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*barline.Barline, error)); ok {
+		return rf(token)
+	}
+	if rf, ok := ret.Get(0).(func(string) *barline.Barline); ok {
+		r0 = rf(token)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*barline.Barline)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(token)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SymbolMapper_BarlineForToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'BarlineForToken'
+type SymbolMapper_BarlineForToken_Call struct {
+	*mock.Call
+}
+
+// BarlineForToken is a helper method to define mock.On call
+//   - token string
+func (_e *SymbolMapper_Expecter) BarlineForToken(token interface{}) *SymbolMapper_BarlineForToken_Call {
+	return &SymbolMapper_BarlineForToken_Call{Call: _e.mock.On("BarlineForToken", token)}
+}
+
+func (_c *SymbolMapper_BarlineForToken_Call) Run(run func(token string)) *SymbolMapper_BarlineForToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *SymbolMapper_BarlineForToken_Call) Return(_a0 *barline.Barline, _a1 error) *SymbolMapper_BarlineForToken_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *SymbolMapper_BarlineForToken_Call) RunAndReturn(run func(string) (*barline.Barline, error)) *SymbolMapper_BarlineForToken_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // IsTimeSignature provides a mock function with given fields: token

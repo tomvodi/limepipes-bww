@@ -3,6 +3,7 @@ package symbolmapper
 import (
 	"fmt"
 	"github.com/jinzhu/copier"
+	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/barline"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/measure"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/symbols"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
@@ -11,9 +12,21 @@ import (
 
 var symbolsMap = map[string]*symbols.Symbol{}
 var timeSignatureMap = map[string]*measure.TimeSignature{}
+var barlineMap = map[string]*barline.Barline{}
 var timeSignatureKeys = []string{}
 
 type Mapper struct {
+}
+
+func (m *Mapper) BarlineForToken(
+	token string,
+) (*barline.Barline, error) {
+	bl, ok := barlineMap[token]
+	if !ok {
+		return nil, common.ErrSymbolNotFound
+	}
+
+	return bl, nil
 }
 
 func (m *Mapper) IsTimeSignature(token string) bool {
