@@ -152,7 +152,7 @@ func fillTunePartsFromStaves(
 func getMeasuresFromStave(stave *Staff, ctx *staffContext) ([]*measure.Measure, error) {
 	var measures []*measure.Measure
 	currMeasure := &measure.Measure{}
-	currMeasure.InlineText = ctx.NextMeasureInLineText
+	currMeasure.InlineTexts = ctx.NextMeasureInLineText
 	currMeasure.Comments = ctx.NextMeasureComments
 	ctx.NextMeasureInLineText = nil
 	ctx.NextMeasureComments = nil
@@ -1053,7 +1053,7 @@ func handleInsideStaffComment(
 ) {
 	if lastSym != nil {
 		if lastSym.IsNote() {
-			lastSym.Note.Comment = text
+			lastSym.Comments = append(lastSym.Comments, text)
 		}
 	} else {
 		if currentMeasure != nil {

@@ -96,6 +96,20 @@ func (c *Converter) fillMeasure(
 			return err
 		}
 
+		if len(s.InlineTexts) > 0 {
+			it := toStringSlice[filestructure.InlineText](s.InlineTexts)
+			for _, t := range it {
+				sym.InlineTexts = append(sym.InlineTexts, t)
+			}
+		}
+
+		if len(s.Comments) > 0 {
+			c := toStringSlice[filestructure.InlineComment](s.Comments)
+			for _, t := range c {
+				sym.Comments = append(sym.Comments, t)
+			}
+		}
+
 		prevSym := dest.LastSymbol()
 		if prevSym != nil && prevSym.CanBeMergedWith(sym) {
 			prevSym.MergeWith(sym)
@@ -122,46 +136,41 @@ func fillInlineTextAndComments(
 func (c *Converter) setBarlines(
 	dest *measure.Measure,
 	src *filestructure.Measure,
-) error {
+) {
 	if src.LeftBarline != "" {
 		bl, err := c.mapper.BarlineForToken(string(src.LeftBarline))
+		// there should be only common.ErrSymbolNotFound possible
 		if errors.Is(err, common.ErrSymbolNotFound) {
 			log.Fatal().Msgf(
 				"barline %s not found",
 				src.LeftBarline,
 			)
 		}
-		if err != nil {
-			return err
-		}
 
 		dest.LeftBarline = bl
 	}
 
 	if src.RightBarline == "" {
-		return nil
+		return
 	}
 
 	bl, err := c.mapper.BarlineForToken(string(src.RightBarline))
+	// there should be only common.ErrSymbolNotFound possible
 	if errors.Is(err, common.ErrSymbolNotFound) {
 		log.Fatal().Msgf(
 			"barline %s not found",
 			src.RightBarline,
 		)
 	}
-	if err != nil {
-		return err
-	}
-	dest.RightBarline = bl
 
-	return nil
+	dest.RightBarline = bl
 }
 
 type MeasureText interface {
 	filestructure.InlineText |
-	filestructure.InlineComment |
-	filestructure.StaffInline |
-	filestructure.StaffComment
+		filestructure.InlineComment |
+		filestructure.StaffInline |
+		filestructure.StaffComment
 }
 
 func toStringSlice[T MeasureText](
@@ -187,12 +196,12 @@ func addInlineTexts(
 		return
 	}
 
-	if len(staff.InlineText) == 0 {
-		staff.InlineText = make([]string, 0)
+	if len(staff.InlineTexts) == 0 {
+		staff.InlineTexts = make([]string, 0)
 	}
 
 	for _, it := range texts {
-		staff.InlineText = append(staff.InlineText, it)
+		staff.InlineTexts = append(staff.InlineTexts, it)
 	}
 }
 
