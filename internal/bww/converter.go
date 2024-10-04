@@ -43,6 +43,7 @@ func fillTuneWithHeader(
 	t.Title = string(h.Title)
 	t.Type = string(h.Type)
 	t.Composer = string(h.Composer)
+	t.Tempo = uint32(h.Tempo)
 
 	if len(h.Footer) > 0 {
 		t.Footer = make([]string, len(h.Footer))
@@ -168,9 +169,9 @@ func (c *Converter) setBarlines(
 
 type MeasureText interface {
 	filestructure.InlineText |
-		filestructure.InlineComment |
-		filestructure.StaffInline |
-		filestructure.StaffComment
+	filestructure.InlineComment |
+	filestructure.StaffInline |
+	filestructure.StaffComment
 }
 
 func toStringSlice[T MeasureText](
@@ -225,6 +226,17 @@ func addComments(
 func (c *Converter) convertSymbol(
 	ms *filestructure.MusicSymbol,
 ) (*symbols.Symbol, error) {
+	if ms.TempoChange > 0 {
+		tc := uint64(ms.TempoChange)
+		return &symbols.Symbol{
+			TempoChange: &tc,
+		}, nil
+	}
+
+	if ms.Text == "" {
+		return nil, fmt.Errorf("empty symbol text for %+v", ms)
+	}
+
 	sym, err := c.mapper.SymbolForToken(ms.Text)
 	if errors.Is(err, common.ErrSymbolNotFound) {
 		return nil, fmt.Errorf(

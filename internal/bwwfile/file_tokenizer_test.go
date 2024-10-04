@@ -156,4 +156,29 @@ TuneFormat,(1,0,M,L,500,500,500,500,P,0,0)
 			)
 		})
 	})
+
+	When("tokenize a file with tune tempo", func() {
+		BeforeEach(func() {
+			data = []byte(`Bagpipe Reader:1.0
+"Tune Title",(T,L,0,0,Times New Roman,15,700,0,1,2,0,0,32768)
+TuneTempo,105
+& TuneTempo,80 C_4  !t
+`)
+		})
+
+		It("should tokenize the file", func() {
+			printTokens(tokens)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(tokens).Should(BeComparableTo(
+				[]*common.Token{
+					newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+					newToken(filestructure.TuneTitle("Tune Title"), 1, 0),
+					newToken(filestructure.TuneTempo(105), 2, 0),
+					newToken(filestructure.StaffStart("&"), 3, 0),
+					newToken(filestructure.TempoChange(80), 3, 2),
+					newToken("C_4", 3, 15),
+					newToken(filestructure.StaffEnd("!t"), 3, 20)}),
+			)
+		})
+	})
 })

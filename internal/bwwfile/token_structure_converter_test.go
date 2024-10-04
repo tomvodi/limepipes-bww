@@ -534,4 +534,54 @@ I! B_4
 			}))
 		})
 	})
+
+	When("converting file with tune tempo definitions", func() {
+		BeforeEach(func() {
+			tokens = []*common.Token{
+				newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+				newToken(filestructure.TuneTitle("Tune Title"), 1, 0),
+				newToken(filestructure.TuneTempo(105), 2, 0),
+				newToken(filestructure.StaffStart("&"), 3, 0),
+				newToken(filestructure.TempoChange(80), 3, 2),
+				newToken("C_4", 3, 15),
+				newToken(filestructure.StaffEnd("!t"), 3, 20),
+			}
+		})
+
+		It("should convert the tokens to a BwwFile", func() {
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(bwwFile).Should(BeComparableTo(&filestructure.BwwFile{
+				BagpipePlayerVersion: "Bagpipe Reader:1.0",
+				TuneDefs: []filestructure.TuneDefinition{
+					{
+						Data: []byte(`Bagpipe Reader:1.0
+"Tune Title",(T,L,0,0,Times NewConverter Roman,11,700,0,0,0,0,0,0)
+TuneTempo,105
+& TuneTempo,80 C_4 !t
+`),
+						Tune: &filestructure.Tune{
+							Header: &filestructure.TuneHeader{
+								Title: "Tune Title",
+								Tempo: filestructure.TuneTempo(105),
+							},
+							Measures: []*filestructure.Measure{
+								{
+									Symbols: []*filestructure.MusicSymbol{
+										{
+											Pos:         filestructure.Position{Line: 3, Column: 2},
+											TempoChange: filestructure.TempoChange(80),
+										},
+										{
+											Pos:  filestructure.Position{Line: 3, Column: 15},
+											Text: "C_4",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}))
+		})
+	})
 })

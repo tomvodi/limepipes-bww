@@ -1,5 +1,5 @@
 - title: Tune Title
-  tempo: 0
+  tempo: 105
   measures:
     - symbols:
         - tempo_change: 80

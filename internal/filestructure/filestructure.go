@@ -5,7 +5,6 @@ type TimelineEnd string
 type TuneComment string
 type InlineComment string
 type InlineText string
-type Tempo int
 type TuneTitle string
 type TuneType string
 type TuneComposer string
@@ -16,6 +15,8 @@ type StaffStart string
 type StaffEnd string
 type StaffComment string
 type StaffInline string
+type TuneTempo uint32
+type TempoChange uint32
 
 type BwwFile struct {
 	BagpipePlayerVersion BagpipePlayerVersion
@@ -39,6 +40,7 @@ type TuneHeader struct {
 	Footer      []TuneFooter
 	InlineTexts []TuneInline
 	Comments    []TuneComment
+	Tempo       TuneTempo
 }
 
 type Measure struct {
@@ -56,6 +58,11 @@ type MusicSymbol struct {
 	Text        string
 	InlineTexts []InlineText
 	Comments    []InlineComment
+	TempoChange TempoChange
+}
+
+func (m *MusicSymbol) IsTempoChange() bool {
+	return m.TempoChange > 0
 }
 
 type Position struct {

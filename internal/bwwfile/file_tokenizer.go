@@ -8,6 +8,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-bww/internal/filestructure"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -25,6 +26,7 @@ var commentRegex = regexp.MustCompile(`"([^"]*)"$`)
 var staffEndRegex = regexp.MustCompile(`^(''!I|!t|!I)$`)
 var barlineRegex = regexp.MustCompile(`^(!|I!''|I!)$`)
 var metaRegex = regexp.MustCompile(`^(MIDINoteMappings|FrequencyMappings|InstrumentMappings|GracenoteDurations|FontSizes|TuneFormat)`)
+var tuneTempoRegex = regexp.MustCompile(`^TuneTempo,(\d+)$`)
 
 type Tokenizer struct {
 	state    ParserState
@@ -180,6 +182,20 @@ func (t *Tokenizer) getFileTokensFromLine(
 		return []*common.Token{comment}, nil
 	}
 
+	tute, err := getTuneTempo(line)
+	if err != nil && !errors.Is(err, common.ErrSymbolNotFound) {
+		return nil, err
+	}
+	if err == nil {
+		return []*common.Token{
+			{
+				Value: filestructure.TuneTempo(tute),
+				Line:  t.currLine,
+				Col:   0,
+			},
+		}, nil
+	}
+
 	if t.isMetaData(line) {
 		return nil, common.ErrLineSkip
 	}
@@ -317,6 +333,16 @@ func (t *Tokenizer) getStaffTokensFromLine(
 			continue
 		}
 
+		tute, err := getTuneTempo(tokStr)
+		if err != nil && !errors.Is(err, common.ErrSymbolNotFound) {
+			return nil, err
+		}
+		if err == nil {
+			currTok.Value = filestructure.TempoChange(tute)
+			tokens = append(tokens, currTok)
+			continue
+		}
+
 		if ct := t.isComment(tokStr); ct != nil {
 			currTok.Value = ct.Value
 			tokens = append(tokens, currTok)
@@ -334,6 +360,21 @@ func (t *Tokenizer) getStaffTokensFromLine(
 	}
 
 	return tokens, nil
+}
+
+func getTuneTempo(text string) (uint32, error) {
+	idx := tuneTempoRegex.FindAllSubmatchIndex([]byte(text), -1)
+	for _, loc := range idx {
+		tt := text[loc[2]:loc[3]]
+		tempo, err := strconv.ParseUint(tt, 10, 32)
+		if err != nil {
+			return 0, err
+		}
+
+		return uint32(tempo), nil
+	}
+
+	return 0, common.ErrSymbolNotFound
 }
 
 func NewTokenizer() *Tokenizer {

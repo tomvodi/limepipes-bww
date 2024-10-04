@@ -136,7 +136,7 @@ func getTuneFromTokens(
 		Measures: make([]*filestructure.Measure, 0),
 	}
 
-	fillTuneHeader(t.Header, tt)
+	tt = fillTuneHeader(t.Header, tt)
 
 	t.Measures = measuresForTokens(tt)
 
@@ -170,6 +170,12 @@ func getTuneDataFromTokens(
 		case filestructure.TuneComment:
 			t := fmt.Sprintf("%#v", v)
 			data = append(data, []byte(t+"\n")...)
+		case filestructure.TuneTempo:
+			t := fmt.Sprintf("TuneTempo,%d\n", v)
+			data = append(data, []byte(t)...)
+		case filestructure.TempoChange:
+			t := fmt.Sprintf(" TuneTempo,%d", v)
+			data = append(data, []byte(t)...)
 		case filestructure.StaffStart:
 			t := fmt.Sprintf("%#v", v)
 			t = strings.Trim(t, "\"")
@@ -204,12 +210,20 @@ func getTuneDataFromTokens(
 	return data
 }
 
+// fillTuneHeader fills the tune header with the tokens and returns the remaining tokens
 func fillTuneHeader(
 	h *filestructure.TuneHeader,
 	tt TuneTokens,
-) {
-	for _, token := range tt {
+) TuneTokens {
+	staffStartIdx := -1
+	for i, token := range tt {
 		switch token.Value.(type) {
+		case filestructure.StaffStart,
+			filestructure.StaffComment,
+			filestructure.StaffInline:
+			// if staff starts, the header is finished
+			staffStartIdx = i
+			goto headerfinished
 		case filestructure.TuneTitle:
 			h.Title = token.Value.(filestructure.TuneTitle)
 		case filestructure.TuneType:
@@ -222,8 +236,17 @@ func fillTuneHeader(
 			h.InlineTexts = append(h.InlineTexts, token.Value.(filestructure.TuneInline))
 		case filestructure.TuneComment:
 			h.Comments = append(h.Comments, token.Value.(filestructure.TuneComment))
+		case filestructure.TuneTempo:
+			h.Tempo = token.Value.(filestructure.TuneTempo)
 		}
 	}
+
+headerfinished:
+	if staffStartIdx == -1 {
+		return nil // only a header was found
+	}
+
+	return tt[staffStartIdx:]
 }
 
 func measuresForTokens(
@@ -270,6 +293,15 @@ func measuresForTokens(
 			} else {
 				currMeasure.InlineTexts = append(currMeasure.InlineTexts, v)
 			}
+		case filestructure.TempoChange:
+			sym := &filestructure.MusicSymbol{
+				Pos: filestructure.Position{
+					Line:   t.Line,
+					Column: t.Col,
+				},
+				TempoChange: v,
+			}
+			currMeasure.Symbols = append(currMeasure.Symbols, sym)
 		case string:
 			sym := &filestructure.MusicSymbol{
 				Pos: filestructure.Position{
