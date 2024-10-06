@@ -13,7 +13,8 @@ type TuneFixer struct {
 }
 
 func (tf *TuneFixer) Fix(parsedTunes []*messages.ParsedTune) {
-	for _, t := range muMo {
+	for _, pt := range parsedTunes {
+		t := pt.Tune
 		fixComposerArranger(t)
 		fixComposerTrad(t)
 		removeTimeSigFromTuneType(t)

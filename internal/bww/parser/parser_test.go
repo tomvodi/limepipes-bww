@@ -11,6 +11,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww/symbolmapper"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bwwfile"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/utils"
 	"io"
@@ -690,7 +691,7 @@ var _ = Describe("BWW Parser", func() {
 			//exportToYaml(musicTunesBww, "./testfiles/tune_with_time_line_end_after_staff_end.yaml")
 		})
 
-		It("should have parsed file correctly", func() {
+		It("should return an error", func() {
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("staff end token is not at the end of line 5"))
 		})
@@ -732,166 +733,155 @@ var _ = Describe("BWW Parser", func() {
 
 	When("having file with all cadences in it", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/cadences.bww"
 			testFileExpect = "./testfiles/cadences.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/cadences.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
 	When("having file with piobairached grips in it", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/pio_grips.bww"
 			testFileExpect = "./testfiles/pio_grips.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/pio_grips.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
 	When("having file with piobairached echo beats in it", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/pio_echo_beats.bww"
 			testFileExpect = "./testfiles/pio_echo_beats.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/pio_echo_beats.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
 	When("having file with piobairached darodos in it", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/pio_darodo.bww"
 			testFileExpect = "./testfiles/pio_darodo.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/pio_darodo.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
 	When("having file with piobairached lemluaths in it", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/pio_lemluaths.bww"
 			testFileExpect = "./testfiles/pio_lemluaths.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/pio_lemluaths.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
 	When("having file with piobairached taorluaths in it", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/pio_taorluaths.bww"
 			testFileExpect = "./testfiles/pio_taorluaths.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/pio_taorluaths.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
 	When("having file with piobairached crunluaths in it", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/pio_crunluaths.bww"
 			testFileExpect = "./testfiles/pio_crunluaths.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/pio_crunluaths.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
 	When("having file with piobairached triplings in it", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/pio_triplings.bww"
 			testFileExpect = "./testfiles/pio_triplings.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/pio_triplings.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
 	When("having file with misc movements in it", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/pio_misc.bww"
 			testFileExpect = "./testfiles/pio_misc.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/pio_misc.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
 	When("having file with segno and dalsegno", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/segno_dalsegno.bww"
 			testFileExpect = "./testfiles/segno_dalsegno.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/segno_dalsegno.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
 	When("having file with fine and dacapoalfine", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/fine_dacapoalfine.bww"
 			testFileExpect = "./testfiles/fine_dacapoalfine.yaml"
 			//exportToYaml(musicTunesBww, "./testfiles/fine_dacapoalfine.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).Should(
-				BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).Should(
+			//	BeComparableTo(musicTunesExpect, helper.MusicModelCompareOptions))
 		})
 	})
 
@@ -939,13 +929,12 @@ var _ = Describe("BWW Parser", func() {
 
 	When("parsing the file with all piobaireached symbols in it", func() {
 		BeforeEach(func() {
-			Skip("Piobairached is not supported")
 			testFile = "./testfiles/all_piobaireached_symbols.bww"
 		})
 
 		It("should succeed", func() {
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(musicTunesBww).To(HaveLen(11))
+			Expect(err).Should(Equal(common.ErrPiobNotSupported))
+			//Expect(musicTunesBww).To(HaveLen(11))
 		})
 	})
 })

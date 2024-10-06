@@ -71,7 +71,7 @@ func (t *Tokenizer) Tokenize(
 			return nil, err
 		}
 
-		if lastTokenIsStaffEnd(lineTokens) {
+		if lineTokensEndStaff(lineTokens) {
 			t.state = FileState
 		}
 
@@ -89,15 +89,36 @@ func (t *Tokenizer) Tokenize(
 	return allTokens, nil
 }
 
-// lastTokenIsStaffEnd checks if the last token in the slice is a StaffEnd token.
-func lastTokenIsStaffEnd(tokens TuneTokens) bool {
+// lineTokensEndStaff checks if the last token in the slice is a StaffEnd token or
+// if the last token is a dalsegno or dacapoalfine and the penultimate token is a StaffEnd token.
+func lineTokensEndStaff(tokens TuneTokens) bool {
 	if len(tokens) == 0 {
 		return false
 	}
 
 	lastToken := tokens[len(tokens)-1].Value
 	_, lastTokenIsStaffEnd := lastToken.(filestructure.StaffEnd)
-	return lastTokenIsStaffEnd
+
+	if lastTokenIsStaffEnd {
+		return true
+	}
+
+	// check for staff end followed by dalsegno or dacapoalfine
+	if len(tokens) <= 1 {
+		return false
+	}
+
+	penultimateToken := tokens[len(tokens)-2].Value
+	_, penultimateTokenIsStaffEnd := penultimateToken.(filestructure.StaffEnd)
+
+	_, lastTokenIsDalSegno := lastToken.(filestructure.DalSegno)
+	_, lastTokenIsDaCapoAlFine := lastToken.(filestructure.DacapoAlFine)
+
+	if penultimateTokenIsStaffEnd && (lastTokenIsDalSegno || lastTokenIsDaCapoAlFine) {
+		return true
+	}
+
+	return false
 }
 
 func containsStaffEnd(tokens []*common.Token) bool {
@@ -154,7 +175,7 @@ func (t *Tokenizer) getTokensFromLine(
 			return nil, err
 		}
 
-		if containsStaffEnd(tokens) && !lastTokenIsStaffEnd(tokens) {
+		if containsStaffEnd(tokens) && !lineTokensEndStaff(tokens) {
 			return nil, fmt.Errorf("staff end token is not at the end of line %d", t.currLine)
 		}
 
@@ -323,6 +344,18 @@ func (t *Tokenizer) getStaffTokensFromLine(
 
 		if tokStr == "&" {
 			currTok.Value = filestructure.StaffStart(tokStr)
+			tokens = append(tokens, currTok)
+			continue
+		}
+
+		if tokStr == "dalsegno" {
+			currTok.Value = filestructure.DalSegno(tokStr)
+			tokens = append(tokens, currTok)
+			continue
+		}
+
+		if tokStr == "dacapoalfine" {
+			currTok.Value = filestructure.DacapoAlFine(tokStr)
 			tokens = append(tokens, currTok)
 			continue
 		}

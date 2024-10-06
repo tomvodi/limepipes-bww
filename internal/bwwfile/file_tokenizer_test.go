@@ -181,4 +181,58 @@ TuneTempo,105
 			)
 		})
 	})
+
+	When("tokenize a file with dalsegno", func() {
+		BeforeEach(func() {
+			data = []byte(`Bagpipe Reader:1.0
+"Tune Title",(T,L,0,0,Times New Roman,15,700,0,1,2,0,0,32768)
+& segno 
+! C_4 !t dalsegno
+`)
+		})
+
+		It("should tokenize the file", func() {
+			//printTokens(tokens)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(tokens).Should(BeComparableTo(
+				[]*common.Token{
+					newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+					newToken(filestructure.TuneTitle("Tune Title"), 1, 0),
+					newToken(filestructure.StaffStart("&"), 2, 0),
+					newToken("segno", 2, 2),
+					newToken(filestructure.Barline("!"), 3, 0),
+					newToken("C_4", 3, 2),
+					newToken(filestructure.StaffEnd("!t"), 3, 6),
+					newToken(filestructure.DalSegno("dalsegno"), 3, 9),
+				}),
+			)
+		})
+	})
+
+	When("tokenize a file with dacapoalfine", func() {
+		BeforeEach(func() {
+			data = []byte(`Bagpipe Reader:1.0
+"Tune Title",(T,L,0,0,Times New Roman,15,700,0,1,2,0,0,32768)
+& segno 
+! C_4 !t dacapoalfine
+`)
+		})
+
+		It("should tokenize the file", func() {
+			printTokens(tokens)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(tokens).Should(BeComparableTo(
+				[]*common.Token{
+					newToken(filestructure.BagpipePlayerVersion("Bagpipe Reader:1.0"), 0, 0),
+					newToken(filestructure.TuneTitle("Tune Title"), 1, 0),
+					newToken(filestructure.StaffStart("&"), 2, 0),
+					newToken("segno", 2, 2),
+					newToken(filestructure.Barline("!"), 3, 0),
+					newToken("C_4", 3, 2),
+					newToken(filestructure.StaffEnd("!t"), 3, 6),
+					newToken(filestructure.DacapoAlFine("dacapoalfine"), 3, 9),
+				}),
+			)
+		})
+	})
 })

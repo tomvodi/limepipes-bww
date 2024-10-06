@@ -11,6 +11,7 @@ import (
 )
 
 var symbolsMap = map[string]*symbols.Symbol{}
+var piobSymbols []string
 var timeSignatureMap = map[string]*measure.TimeSignature{}
 var barlineMap = map[string]*barline.Barline{}
 var timeSignatureKeys = []string{}
@@ -45,6 +46,10 @@ func (m *Mapper) TimeSigForToken(token string) (*measure.TimeSignature, error) {
 func (m *Mapper) SymbolForToken(token string) (*symbols.Symbol, error) {
 	sym, ok := symbolsMap[token]
 	if !ok {
+		if slices.Contains(piobSymbols, token) {
+			return nil, common.ErrPiobNotSupported
+		}
+
 		return nil, common.ErrSymbolNotFound
 	}
 	// If nil symbol is found, Symbols should be skipped

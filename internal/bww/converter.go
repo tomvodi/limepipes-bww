@@ -1,4 +1,4 @@
-// Package filestructure contains the definition for a bww file structure and a
+// Package bww contains the definition for a bww file structure and a
 // converter to convert the file structure tune into a music model tune.
 package bww
 

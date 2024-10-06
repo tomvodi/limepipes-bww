@@ -13,6 +13,8 @@ type TuneInline string
 type Barline string
 type StaffStart string
 type StaffEnd string
+type DalSegno string
+type DacapoAlFine string
 type StaffComment string
 type StaffInline string
 type TuneTempo uint32
