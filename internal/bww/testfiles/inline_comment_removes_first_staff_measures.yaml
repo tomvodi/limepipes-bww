@@ -1,5 +1,5 @@
 - title: inline comment removes first staff measures
-  inline_text:
+  inline_texts:
     - 'A:'
   tempo: 62
   measures:
@@ -14,5 +14,5 @@
         - note:
             pitch: LowA
             length: Quarter
-      inline_text:
+      inline_texts:
         - 'B:'

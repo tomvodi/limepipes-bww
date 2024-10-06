@@ -73,6 +73,7 @@ var _ = Describe("BWW Parser", func() {
 		symmap := symbolmapper.New()
 		fsconv := bww.NewConverter(symmap)
 		parser = New(sp, fsconv)
+		musicTunesBww = make(musicmodel.MusicModel, 0)
 	})
 
 	JustBeforeEach(func() {
@@ -160,7 +161,7 @@ var _ = Describe("BWW Parser", func() {
 		})
 
 		JustBeforeEach(func() {
-			exportToYaml(musicTunesBww, "./testfiles/embellishment_without_following_note.yaml")
+			//exportToYaml(musicTunesBww, "./testfiles/embellishment_without_following_note.yaml")
 		})
 
 		It("should have parsed file correctly", func() {
@@ -898,6 +899,9 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/inline_comment_removes_first_staff_measures.bww"
 			testFileExpect = "./testfiles/inline_comment_removes_first_staff_measures.yaml"
+		})
+
+		JustBeforeEach(func() {
 			//exportToYaml(musicTunesBww, "./testfiles/inline_comment_removes_first_staff_measures.yaml")
 		})
 

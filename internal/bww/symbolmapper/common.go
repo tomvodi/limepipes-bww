@@ -16,6 +16,17 @@ var lowPitchesLgToHG = []string{"lg", "la", "b", "c", "d", "e", "f", "hg"}
 var lowPitchesLaToHG = []string{"la", "b", "c", "d", "e", "f", "hg"}
 var lowPitchesLaToHA = []string{"la", "b", "c", "d", "e", "f", "hg", "ha"}
 var lowPitchesLaToF = []string{"la", "b", "c", "d", "e", "f"}
+var lowPitchToPitch = map[string]pitch.Pitch{
+	"lg": pitch.Pitch_LowG,
+	"la": pitch.Pitch_LowA,
+	"b":  pitch.Pitch_B,
+	"c":  pitch.Pitch_C,
+	"d":  pitch.Pitch_D,
+	"e":  pitch.Pitch_E,
+	"f":  pitch.Pitch_F,
+	"hg": pitch.Pitch_HighG,
+	"ha": pitch.Pitch_HighA,
+}
 
 func newEmbellishment(
 	eType embellishment.Type,

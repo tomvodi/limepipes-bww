@@ -8,7 +8,7 @@
     - note:
         pitch: D
         length: Quarter
-    inline_text:
+    inline_texts:
     - staff inline text
 - title: Tune 2 Title
   measures:

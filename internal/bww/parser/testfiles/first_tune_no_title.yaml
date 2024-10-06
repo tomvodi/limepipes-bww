@@ -8,5 +8,5 @@
         length: Quarter
     comments:
     - staff  comment
-    inline_text:
+    inline_texts:
     - staff inline text

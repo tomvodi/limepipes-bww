@@ -11,7 +11,7 @@
         - note:
             pitch: D
             length: Quarter
-      inline_text:
+      inline_texts:
         - stave inline text
 - title: Tune 2 Title
   tempo: 0

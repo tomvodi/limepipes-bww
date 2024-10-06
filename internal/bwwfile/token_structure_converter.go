@@ -223,7 +223,7 @@ func fillTuneHeader(
 			filestructure.StaffInline:
 			// if staff starts, the header is finished
 			staffStartIdx = i
-			goto headerfinished
+			goto headerFinished
 		case filestructure.TuneTitle:
 			h.Title = token.Value.(filestructure.TuneTitle)
 		case filestructure.TuneType:
@@ -241,7 +241,7 @@ func fillTuneHeader(
 		}
 	}
 
-headerfinished:
+headerFinished:
 	if staffStartIdx == -1 {
 		return nil // only a header was found
 	}

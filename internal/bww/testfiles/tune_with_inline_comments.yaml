@@ -2,7 +2,7 @@
   comments:
     - just a comment
     - and another comment
-  inline_text:
+  inline_texts:
     - tune inline text
   tempo: 0
   measures:
@@ -18,5 +18,5 @@
             length: Quarter
       comments:
         - stave comment
-      inline_text:
+      inline_texts:
         - stave inline text

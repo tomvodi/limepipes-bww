@@ -97,7 +97,7 @@ func fillTuneWithParameter(tune *tune.Tune, params []*TuneParameter) error {
 				tune.Footer = append(tune.Footer, text)
 			}
 			if firstParam == InlineParameter {
-				tune.InlineText = append(tune.InlineText, text)
+				tune.InlineTexts = append(tune.InlineTexts, text)
 			}
 		}
 

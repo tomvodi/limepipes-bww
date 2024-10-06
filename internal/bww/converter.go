@@ -53,9 +53,9 @@ func fillTuneWithHeader(
 	}
 
 	if len(h.InlineTexts) > 0 {
-		t.InlineText = make([]string, len(h.InlineTexts))
+		t.InlineTexts = make([]string, len(h.InlineTexts))
 		for i, it := range h.InlineTexts {
-			t.InlineText[i] = string(it)
+			t.InlineTexts[i] = string(it)
 		}
 	}
 
@@ -169,9 +169,9 @@ func (c *Converter) setBarlines(
 
 type MeasureText interface {
 	filestructure.InlineText |
-	filestructure.InlineComment |
-	filestructure.StaffInline |
-	filestructure.StaffComment
+		filestructure.InlineComment |
+		filestructure.StaffInline |
+		filestructure.StaffComment
 }
 
 func toStringSlice[T MeasureText](
