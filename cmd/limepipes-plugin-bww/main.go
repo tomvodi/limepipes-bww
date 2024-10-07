@@ -8,6 +8,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww/parser"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww/symbolmapper"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/bww/symbolmerger"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bwwfile"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common/helper"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/pluginimplementation"
@@ -28,7 +29,8 @@ func main() {
 		tokConv,
 	)
 	symmap := symbolmapper.New()
-	fsconv := bww.NewConverter(symmap)
+	merger := symbolmerger.NewCollectedMerger()
+	fsconv := bww.NewConverter(symmap, merger)
 	impl := pluginimplementation.NewPluginImplementation(
 		parser.New(sp, fsconv),
 		helper.NewTuneFixer(),

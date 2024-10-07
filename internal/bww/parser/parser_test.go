@@ -10,6 +10,7 @@ import (
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bww/symbolmapper"
+	"github.com/tomvodi/limepipes-plugin-bww/internal/bww/symbolmerger"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/bwwfile"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
@@ -72,7 +73,8 @@ var _ = Describe("BWW Parser", func() {
 			tokConv,
 		)
 		symmap := symbolmapper.New()
-		fsconv := bww.NewConverter(symmap)
+		merger := symbolmerger.NewCollectedMerger()
+		fsconv := bww.NewConverter(symmap, merger)
 		parser = New(sp, fsconv)
 		musicTunesBww = make(musicmodel.MusicModel, 0)
 	})
