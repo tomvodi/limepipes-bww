@@ -13,6 +13,7 @@ const staffEnd = "!t"
 const simpleBarline = "!"
 
 type TuneTokens []*common.Token
+type MeasureTokens []*common.Token
 
 type TokenConverter struct {
 }
@@ -56,41 +57,58 @@ func getBagpipePlayerVersion(
 	return "", fmt.Errorf("no Bagpipe Player Version found")
 }
 
-// getTuneTokens gets the tokens from a file and splits them up into tokens for each tune
+// getTuneTokens gets the tokens from a file and splits them up into tokens for each tune.
+// If the first tune doesn't have a title, a TuneTitle token "No Name" is added.
 func getTuneTokens(
 	tokens []*common.Token,
 ) []TuneTokens {
-	var tuneTokens []TuneTokens
+	var allTuneTokens []TuneTokens
 	var currTuneTokens TuneTokens
-	for _, t := range tokens {
+
+	for {
+		currTuneTokens, tokens = extractFirstTuneTokens(tokens)
+
+		if !tuneTokensHaveTitle(currTuneTokens) {
+			currTuneTokens = prependNoNameTitle(currTuneTokens)
+		}
+
+		allTuneTokens = append(allTuneTokens, currTuneTokens)
+
+		if tokens == nil {
+			break
+		}
+	}
+
+	return allTuneTokens
+}
+
+// extractFirstTuneTokens extracts the TuneTokens for the first tune from the tokens
+// and returns the remaining tokens.
+func extractFirstTuneTokens(
+	tokens []*common.Token,
+) (TuneTokens, []*common.Token) {
+	tt := make(TuneTokens, 0)
+	titleAdded := false
+
+	for i, t := range tokens {
 		switch t.Value.(type) {
 		case filestructure.BagpipePlayerVersion:
 			// skipped as it is a file related definition
 		case filestructure.TuneTitle:
-			if tuneTokensHaveTitle(currTuneTokens) {
-				tuneTokens = append(tuneTokens, currTuneTokens)
-				currTuneTokens = make(TuneTokens, 0)
-			} else {
-				if tuneTokensHaveStaff(currTuneTokens) {
-					currTuneTokens = prependNoNameTitle(currTuneTokens)
-					tuneTokens = append(tuneTokens, currTuneTokens)
-					currTuneTokens = make(TuneTokens, 0)
-				}
+			// When tokens have a staff, there was a tune without a title before this title
+			// was found.
+			if tuneTokensHaveStaff(tt) || titleAdded {
+				return tt, tokens[i:]
 			}
-			currTuneTokens = append(currTuneTokens, t)
+
+			tt = append(tt, t)
+			titleAdded = true
 		default:
-			currTuneTokens = append(currTuneTokens, t)
+			tt = append(tt, t)
 		}
 	}
 
-	if len(currTuneTokens) > 0 {
-		if !tuneTokensHaveTitle(currTuneTokens) {
-			currTuneTokens = prependNoNameTitle(currTuneTokens)
-		}
-		tuneTokens = append(tuneTokens, currTuneTokens)
-	}
-
-	return tuneTokens
+	return tt, nil
 }
 
 func tuneTokensHaveTitle(tokens TuneTokens) bool {
@@ -253,74 +271,139 @@ func measuresForTokens(
 	tt TuneTokens,
 ) []*filestructure.Measure {
 	var m []*filestructure.Measure
-	currMeasure := &filestructure.Measure{}
 
-	for _, t := range tt {
-		switch v := t.Value.(type) {
-		case filestructure.StaffStart:
-			// a new staff started though the current staff wasn't finished
-			if len(currMeasure.Symbols) > 0 {
-				m = append(m, currMeasure)
-				currMeasure = &filestructure.Measure{}
-			}
-		case filestructure.StaffEnd:
-			if v != staffEnd {
-				currMeasure.RightBarline = filestructure.Barline(v)
-			}
-			m = append(m, currMeasure)
-			currMeasure = &filestructure.Measure{}
-		case filestructure.Barline:
-			m = append(m, currMeasure)
-			currMeasure = &filestructure.Measure{}
-			if v != simpleBarline {
-				currMeasure.LeftBarline = v
-			}
-		case filestructure.StaffInline:
-			currMeasure.StaffInlineTexts = append(currMeasure.StaffInlineTexts, v)
-		case filestructure.StaffComment:
-			currMeasure.StaffComments = append(currMeasure.StaffComments, v)
-		case filestructure.InlineComment:
-			if len(currMeasure.Symbols) > 0 {
-				sym := currMeasure.Symbols[len(currMeasure.Symbols)-1]
-				sym.Comments = append(sym.Comments, v)
-			} else {
-				currMeasure.InlineComments = append(currMeasure.InlineComments, v)
-			}
-		case filestructure.InlineText:
-			if len(currMeasure.Symbols) > 0 {
-				sym := currMeasure.Symbols[len(currMeasure.Symbols)-1]
-				sym.InlineTexts = append(sym.InlineTexts, v)
-			} else {
-				currMeasure.InlineTexts = append(currMeasure.InlineTexts, v)
-			}
-		case filestructure.TempoChange:
-			sym := &filestructure.MusicSymbol{
-				Pos: filestructure.Position{
-					Line:   t.Line,
-					Column: t.Col,
-				},
-				TempoChange: v,
-			}
-			currMeasure.Symbols = append(currMeasure.Symbols, sym)
-		case string:
-			sym := &filestructure.MusicSymbol{
-				Pos: filestructure.Position{
-					Line:   t.Line,
-					Column: t.Col,
-				},
-				Text: v,
-			}
-			currMeasure.Symbols = append(currMeasure.Symbols, sym)
-		}
-	}
-
-	// if last symbol wasn't a barline or staff end, add the current measure
-	if len(currMeasure.Symbols) > 0 {
-		m = append(m, currMeasure)
+	mtks := measureTokensForTuneTokens(tt)
+	for _, mt := range mtks {
+		m = append(m, measureForTokens(mt))
 	}
 
 	return m
 }
+
+// measureTokensForTuneTokens converts the tokens for a whole tune into
+// tokens for each measure
+func measureTokensForTuneTokens(
+	tt TuneTokens,
+) []MeasureTokens {
+	var mt []MeasureTokens
+	var currMeasureTokens MeasureTokens
+
+	for _, t := range tt {
+		switch t.Value.(type) {
+		case filestructure.StaffStart:
+			if measureTokensAreComplete(currMeasureTokens) {
+				mt = append(mt, currMeasureTokens)
+				currMeasureTokens = make(MeasureTokens, 0)
+			}
+		case filestructure.StaffEnd:
+			// add staff end to current measure and start new measure
+			currMeasureTokens = append(currMeasureTokens, t)
+			mt = append(mt, currMeasureTokens)
+			currMeasureTokens = make(MeasureTokens, 0)
+		case filestructure.Barline:
+			// start new measure and add barline to new measure
+			mt = append(mt, currMeasureTokens)
+			currMeasureTokens = make(MeasureTokens, 0)
+			currMeasureTokens = append(currMeasureTokens, t)
+		default:
+			currMeasureTokens = append(currMeasureTokens, t)
+		}
+	}
+
+	// if last symbol wasn't a barline or staff end, add the current measure
+	if len(currMeasureTokens) > 0 {
+		mt = append(mt, currMeasureTokens)
+	}
+
+	return mt
+}
+
+// returns true, if the measure tokens are complete, i.e. contains symbols.
+// StaffInline and StaffComment are not considered symbols.
+func measureTokensAreComplete(
+	mt MeasureTokens,
+) bool {
+	for _, t := range mt {
+		switch t.Value.(type) {
+		case filestructure.StaffInline,
+			filestructure.StaffComment:
+			continue
+		default:
+			return true
+		}
+	}
+
+	return false
+}
+
+func measureForTokens(
+	mt MeasureTokens,
+) *filestructure.Measure {
+	m := &filestructure.Measure{}
+
+	for _, t := range mt {
+		processTokenForMeasure(m, t)
+	}
+
+	return m
+}
+
+// revive:disable:cognitive-complexity this method has a high complexity due to the number of different token types
+// but it is easy to understand and maintain
+func processTokenForMeasure(
+	m *filestructure.Measure,
+	t *common.Token,
+) {
+	newSym := &filestructure.MusicSymbol{
+		Pos: filestructure.Position{
+			Line:   t.Line,
+			Column: t.Col,
+		},
+	}
+
+	switch v := t.Value.(type) {
+	case filestructure.StaffEnd:
+		if v == staffEnd {
+			break
+		}
+
+		m.RightBarline = filestructure.Barline(v)
+	case filestructure.Barline:
+		if v == simpleBarline {
+			break
+		}
+
+		m.LeftBarline = v
+	case filestructure.StaffInline:
+		m.StaffInlineTexts = append(m.StaffInlineTexts, v)
+	case filestructure.StaffComment:
+		m.StaffComments = append(m.StaffComments, v)
+	case filestructure.InlineComment:
+		if len(m.Symbols) == 0 {
+			m.InlineComments = append(m.InlineComments, v)
+			break
+		}
+
+		sym := m.Symbols[len(m.Symbols)-1]
+		sym.Comments = append(sym.Comments, v)
+	case filestructure.InlineText:
+		if len(m.Symbols) == 0 {
+			m.InlineTexts = append(m.InlineTexts, v)
+			break
+		}
+
+		sym := m.Symbols[len(m.Symbols)-1]
+		sym.InlineTexts = append(sym.InlineTexts, v)
+	case filestructure.TempoChange:
+		newSym.TempoChange = v
+		m.Symbols = append(m.Symbols, newSym)
+	case string:
+		newSym.Text = v
+		m.Symbols = append(m.Symbols, newSym)
+	}
+}
+
+// revive:enable:cognitive-complexity
 
 func NewTokenConverter() *TokenConverter {
 	return &TokenConverter{}

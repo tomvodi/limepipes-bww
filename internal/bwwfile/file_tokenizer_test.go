@@ -33,9 +33,11 @@ func printTokens(tokens []*common.Token) {
 	for _, tok := range tokens {
 		switch t := tok.Value.(type) {
 		case string:
-			fmt.Printf("newToken(\"%v\", %d, %d),\n", t, tok.Line, tok.Col)
+			_, err := fmt.Printf("newToken(\"%v\", %d, %d),\n", t, tok.Line, tok.Col)
+			Expect(err).ShouldNot(HaveOccurred())
 		default:
-			fmt.Printf("newToken(%T(\"%v\"), %d, %d),\n", tok.Value, tok.Value, tok.Line, tok.Col)
+			_, err := fmt.Printf("newToken(%T(\"%v\"), %d, %d),\n", tok.Value, tok.Value, tok.Line, tok.Col)
+			Expect(err).ShouldNot(HaveOccurred())
 		}
 	}
 }

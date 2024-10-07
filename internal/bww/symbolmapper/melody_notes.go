@@ -35,8 +35,21 @@ var lengthMap = map[uint8]length.Length{
 
 func newMelodyNotesMap() map[string]*symbols.Symbol {
 	m := make(map[string]*symbols.Symbol, 108)
+
+	for range pitches {
+		nfm := getNoFlagMelodyNotes()
+		maps.Copy(m, nfm)
+
+		fm := getFlagMelodyNotes()
+		maps.Copy(m, fm)
+	}
+
+	return m
+}
+
+func getNoFlagMelodyNotes() map[string]*symbols.Symbol {
+	m := make(map[string]*symbols.Symbol)
 	const noFlagType = "%s_%d"
-	const flagType = "%s%s_%d"
 	for _, p := range pitches {
 		for _, l := range lengthesAll {
 			m[fmt.Sprintf(noFlagType, p, l)] = &symbols.Symbol{
@@ -46,6 +59,15 @@ func newMelodyNotesMap() map[string]*symbols.Symbol {
 				},
 			}
 		}
+	}
+
+	return m
+}
+
+func getFlagMelodyNotes() map[string]*symbols.Symbol {
+	m := make(map[string]*symbols.Symbol)
+	const flagType = "%s%s_%d"
+	for _, p := range pitches {
 		for _, l := range lengthesFlag {
 			for _, f := range flags {
 				m[fmt.Sprintf(flagType, p, f, l)] = &symbols.Symbol{

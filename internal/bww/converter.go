@@ -130,6 +130,10 @@ func (c *Converter) addSymbolToMeasure(
 		return nil
 	}
 
+	if err != nil {
+		return err
+	}
+
 	prevSym := dest.LastSymbol()
 	if prevSym != nil && c.merger.MergeSymbols(prevSym, sym) {
 		return nil

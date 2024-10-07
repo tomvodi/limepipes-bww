@@ -160,7 +160,6 @@ var _ = Describe("BWW Parser", func() {
 		BeforeEach(func() {
 			testFile = "./testfiles/embellishment_without_following_note.bww"
 			testFileExpect = "./testfiles/embellishment_without_following_note.yaml"
-
 		})
 
 		JustBeforeEach(func() {

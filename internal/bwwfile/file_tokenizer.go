@@ -3,7 +3,6 @@ package bwwfile
 import (
 	"errors"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/filestructure"
 	"regexp"
@@ -19,6 +18,8 @@ const (
 	StaffState                    // State for music symbols between & and!t
 )
 
+const StaffStart = "&"
+
 var bpDefRegex = regexp.MustCompile(`(Bagpipe Reader|Bagpipe Music Writer Gold|Bagpipe Musicworks Gold):\d+\.\d+`)
 var descRegex = regexp.MustCompile(`"([^"]*)",\(([TYMFI])[^)\n]+\)`)
 var tokenRegex = regexp.MustCompile(`"([^"]*)",\(I(,[^,)]+)+\)|"([^"]*)"|\S+`)
@@ -31,7 +32,6 @@ var tuneTempoRegex = regexp.MustCompile(`^TuneTempo,(\d+)$`)
 type Tokenizer struct {
 	state    ParserState
 	currLine int
-	currCol  int
 }
 
 func (t *Tokenizer) Tokenize(
@@ -51,28 +51,13 @@ func (t *Tokenizer) Tokenize(
 
 	var allTokens []*common.Token
 	for _, line := range lines {
-		trimLine := strings.TrimSpace(line)
-		if trimLine == "" {
-			t.currLine++
-			continue
-		}
-
-		if strings.HasPrefix(trimLine, "&") {
-			allTokens = t.checkAndModifyLastTokensForStaffComments(allTokens)
-			t.state = StaffState
-		}
-
-		lineTokens, err := t.getTokensFromLine(line)
+		lineTokens, err := t.TokenizeLine(line)
 		if errors.Is(err, common.ErrLineSkip) {
 			t.currLine++
 			continue
 		}
 		if err != nil {
-			return nil, err
-		}
-
-		if lineTokensEndStaff(lineTokens) {
-			t.state = FileState
+			return nil, fmt.Errorf("error tokenizing line %d: %w", t.currLine, err)
 		}
 
 		allTokens = append(allTokens, lineTokens...)
@@ -80,13 +65,33 @@ func (t *Tokenizer) Tokenize(
 		t.currLine++
 	}
 
-	for _, tok := range allTokens {
-		log.Info().Msgf("Token: '%s' at Line %d in column %d of type %T",
-			tok.Value, tok.Line, tok.Col, tok.Value,
-		)
-	}
+	allTokens = t.checkAndModifyTokensForStaffComments(allTokens)
 
 	return allTokens, nil
+}
+
+func (t *Tokenizer) TokenizeLine(
+	line string,
+) ([]*common.Token, error) {
+	trimLine := strings.TrimSpace(line)
+	if trimLine == "" {
+		return nil, common.ErrLineSkip
+	}
+
+	if strings.HasPrefix(trimLine, StaffStart) {
+		t.state = StaffState
+	}
+
+	lineTokens, err := t.getTokensFromLine(line)
+	if err != nil {
+		return nil, err
+	}
+
+	if lineTokensEndStaff(lineTokens) {
+		t.state = FileState
+	}
+
+	return lineTokens, nil
 }
 
 // lineTokensEndStaff checks if the last token in the slice is a StaffEnd token or
@@ -131,32 +136,46 @@ func containsStaffEnd(tokens []*common.Token) bool {
 	return false
 }
 
-// checkAndModifyLastTokensForStaffComments checks the last tokens for TuneComment and TuneInline
-// types and changes them to StaffComment and StaffInline respectively.
-// As a comment or inline text right before a staff start is considered a staff comment
+// checkAndModifyTokensForStaffComments
+// A comment and/or inline text right before a staff start is considered a staff comment
 // or staff inline text.
-func (t *Tokenizer) checkAndModifyLastTokensForStaffComments(
+// This method checks the last tokens before a StaffStart for TuneComment and TuneInline
+// types and changes them to StaffComment and StaffInline respectively.
+func (t *Tokenizer) checkAndModifyTokensForStaffComments(
 	tokens []*common.Token,
 ) []*common.Token {
-	comment, inline := false, false
 	for i, tok := range slices.Backward(tokens) {
-		// maximum of 2 lines can be changed when there is a
-		// staff comment and an staff inline text
-		if i < len(tokens)-2 {
-			break
+		if _, ok := tok.Value.(filestructure.StaffStart); ok {
+			tokens = t.modifyTokensForStaffCommentsAtStaffStart(tokens, i)
 		}
+	}
 
-		switch v := tok.Value.(type) {
+	return tokens
+}
+
+// modifyTokensForStaffCommentsAtStaffStart modifies the tokens right before a StaffStart token
+// to StaffComment or StaffInline if they are TuneComment or TuneInline.
+func (t *Tokenizer) modifyTokensForStaffCommentsAtStaffStart(
+	tokens []*common.Token,
+	staffStartIndex int,
+) []*common.Token {
+	x := staffStartIndex - 1
+	y := staffStartIndex - 2
+
+	if x >= 0 {
+		switch v := tokens[x].Value.(type) {
 		case filestructure.TuneComment:
-			if !comment {
-				tokens[i].Value = filestructure.StaffComment(v)
-				comment = true
-			}
+			tokens[x].Value = filestructure.StaffComment(v)
 		case filestructure.TuneInline:
-			if !inline {
-				tokens[i].Value = filestructure.StaffInline(v)
-				inline = true
-			}
+			tokens[x].Value = filestructure.StaffInline(v)
+		}
+	}
+	if y >= 0 {
+		switch v := tokens[y].Value.(type) {
+		case filestructure.TuneComment:
+			tokens[y].Value = filestructure.StaffComment(v)
+		case filestructure.TuneInline:
+			tokens[y].Value = filestructure.StaffInline(v)
 		}
 	}
 
@@ -242,34 +261,32 @@ func (t *Tokenizer) isTuneDescription(text string) *common.Token {
 	if idx == nil {
 		return nil
 	}
-	for _, loc := range idx {
-		var val any
-		desc := text[loc[2]:loc[3]]
-		descType := text[loc[4]:loc[5]]
-		if descType == "T" {
-			val = filestructure.TuneTitle(desc)
-		}
-		if descType == "Y" {
-			val = filestructure.TuneType(desc)
-		}
-		if descType == "M" {
-			val = filestructure.TuneComposer(desc)
-		}
-		if descType == "F" {
-			val = filestructure.TuneFooter(desc)
-		}
-		if descType == "I" {
-			val = filestructure.TuneInline(desc)
-		}
 
-		return &common.Token{
-			Value: val,
-			Line:  t.currLine,
-			Col:   loc[0],
-		}
+	loc := idx[0]
+	var val any
+	desc := text[loc[2]:loc[3]]
+	descType := text[loc[4]:loc[5]]
+	if descType == "T" {
+		val = filestructure.TuneTitle(desc)
+	}
+	if descType == "Y" {
+		val = filestructure.TuneType(desc)
+	}
+	if descType == "M" {
+		val = filestructure.TuneComposer(desc)
+	}
+	if descType == "F" {
+		val = filestructure.TuneFooter(desc)
+	}
+	if descType == "I" {
+		val = filestructure.TuneInline(desc)
 	}
 
-	return nil
+	return &common.Token{
+		Value: val,
+		Line:  t.currLine,
+		Col:   loc[0],
+	}
 }
 
 func (t *Tokenizer) isInlineText(text string) *common.Token {
@@ -277,22 +294,20 @@ func (t *Tokenizer) isInlineText(text string) *common.Token {
 	if idx == nil {
 		return nil
 	}
-	for _, loc := range idx {
-		var val any
-		desc := text[loc[2]:loc[3]]
-		descType := text[loc[4]:loc[5]]
-		if descType == "I" {
-			val = filestructure.InlineText(desc)
-		}
 
-		return &common.Token{
-			Value: val,
-			Line:  t.currLine,
-			Col:   loc[0],
-		}
+	loc := idx[0]
+	var val any
+	desc := text[loc[2]:loc[3]]
+	descType := text[loc[4]:loc[5]]
+	if descType == "I" {
+		val = filestructure.InlineText(desc)
 	}
 
-	return nil
+	return &common.Token{
+		Value: val,
+		Line:  t.currLine,
+		Col:   loc[0],
+	}
 }
 
 func (t *Tokenizer) isComment(
@@ -302,20 +317,20 @@ func (t *Tokenizer) isComment(
 	if idx == nil {
 		return nil
 	}
-	for _, loc := range idx {
-		comment := text[loc[2]:loc[3]]
-		tok := &common.Token{
-			Value: filestructure.InlineComment(comment),
-			Line:  t.currLine,
-			Col:   loc[0],
-		}
-		if t.state == FileState {
-			tok.Value = filestructure.TuneComment(comment)
-		}
-		return tok
+
+	loc := idx[0]
+	comment := text[loc[2]:loc[3]]
+	tok := &common.Token{
+		Value: filestructure.InlineComment(comment),
+		Line:  t.currLine,
+		Col:   loc[0],
 	}
 
-	return nil
+	if t.state == FileState {
+		tok.Value = filestructure.TuneComment(comment)
+	}
+
+	return tok
 }
 
 func (t *Tokenizer) isMetaData(
@@ -336,78 +351,78 @@ func (t *Tokenizer) getStaffTokensFromLine(
 			Col:  idx[0],
 		}
 
-		if barlineRegex.MatchString(tokStr) {
-			currTok.Value = filestructure.Barline(tokStr)
-			tokens = append(tokens, currTok)
-			continue
-		}
-
-		if tokStr == "&" {
-			currTok.Value = filestructure.StaffStart(tokStr)
-			tokens = append(tokens, currTok)
-			continue
-		}
-
-		if tokStr == "dalsegno" {
-			currTok.Value = filestructure.DalSegno(tokStr)
-			tokens = append(tokens, currTok)
-			continue
-		}
-
-		if tokStr == "dacapoalfine" {
-			currTok.Value = filestructure.DacapoAlFine(tokStr)
-			tokens = append(tokens, currTok)
-			continue
-		}
-
-		if staffEndRegex.MatchString(tokStr) {
-			currTok.Value = filestructure.StaffEnd(tokStr)
-			tokens = append(tokens, currTok)
-			continue
-		}
-
-		tute, err := getTuneTempo(tokStr)
-		if err != nil && !errors.Is(err, common.ErrSymbolNotFound) {
+		val, err := t.getTokenValueForString(tokStr)
+		if err != nil {
 			return nil, err
 		}
-		if err == nil {
-			currTok.Value = filestructure.TempoChange(tute)
-			tokens = append(tokens, currTok)
-			continue
-		}
+		currTok.Value = val
 
-		if ct := t.isComment(tokStr); ct != nil {
-			currTok.Value = ct.Value
-			tokens = append(tokens, currTok)
-			continue
-		}
-
-		if it := t.isInlineText(tokStr); it != nil {
-			currTok.Value = it.Value
-			tokens = append(tokens, currTok)
-			continue
-		}
-
-		currTok.Value = tokStr
 		tokens = append(tokens, currTok)
 	}
 
 	return tokens, nil
 }
 
-func getTuneTempo(text string) (uint32, error) {
-	idx := tuneTempoRegex.FindAllSubmatchIndex([]byte(text), -1)
-	for _, loc := range idx {
-		tt := text[loc[2]:loc[3]]
-		tempo, err := strconv.ParseUint(tt, 10, 32)
-		if err != nil {
-			return 0, err
-		}
-
-		return uint32(tempo), nil
+// revive:disable:cognitive-complexity this method has a high complexity due to the number of different token types
+// but it is easy to understand and maintain
+func (t *Tokenizer) getTokenValueForString(
+	tokStr string,
+) (any, error) {
+	if barlineRegex.MatchString(tokStr) {
+		return filestructure.Barline(tokStr), nil
 	}
 
-	return 0, common.ErrSymbolNotFound
+	if tokStr == StaffStart {
+		return filestructure.StaffStart(tokStr), nil
+	}
+
+	if tokStr == "dalsegno" {
+		return filestructure.DalSegno(tokStr), nil
+	}
+
+	if tokStr == "dacapoalfine" {
+		return filestructure.DacapoAlFine(tokStr), nil
+	}
+
+	if staffEndRegex.MatchString(tokStr) {
+		return filestructure.StaffEnd(tokStr), nil
+	}
+
+	tute, err := getTuneTempo(tokStr)
+	if err != nil && !errors.Is(err, common.ErrSymbolNotFound) {
+		return nil, err
+	}
+	if err == nil {
+		return filestructure.TempoChange(tute), nil
+	}
+
+	if ct := t.isComment(tokStr); ct != nil {
+		return ct.Value, nil
+	}
+
+	if it := t.isInlineText(tokStr); it != nil {
+		return it.Value, nil
+	}
+
+	return tokStr, nil
+}
+
+// revive:enable:cognitive-complexity
+
+func getTuneTempo(text string) (uint32, error) {
+	idx := tuneTempoRegex.FindAllSubmatchIndex([]byte(text), -1)
+	if len(idx) == 0 {
+		return 0, common.ErrSymbolNotFound
+	}
+
+	loc := idx[0]
+	tt := text[loc[2]:loc[3]]
+	tempo, err := strconv.ParseUint(tt, 10, 32)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint32(tempo), nil
 }
 
 func NewTokenizer() *Tokenizer {

@@ -3,6 +3,7 @@ package helper
 import (
 	. "github.com/onsi/gomega"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
+	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/utils"
 	"testing"
 )
@@ -183,7 +184,7 @@ func Test_fixComposer(t *testing.T) {
 			name: "Trad. arr. E Mule",
 			prepare: func(f *fields) {
 				f.composer = "Trad. arr. E Mule"
-				f.wantComposer = "Trad"
+				f.wantComposer = "Traditional"
 				f.wantArranger = "E Mule"
 			},
 		},
@@ -199,6 +200,12 @@ func Test_fixComposer(t *testing.T) {
 			t := &tune.Tune{
 				Composer: f.composer,
 			}
+			tf := NewTuneFixer()
+			tf.Fix([]*messages.ParsedTune{
+				{
+					Tune: t,
+				},
+			})
 			fixComposerArranger(t)
 			g.Expect(t.Composer).To(Equal(f.wantComposer))
 			g.Expect(t.Arranger).To(Equal(f.wantArranger))
@@ -271,7 +278,12 @@ func Test_fixComposerTrad(t *testing.T) {
 			t := &tune.Tune{
 				Composer: f.composer,
 			}
-			fixComposerTrad(t)
+			tf := NewTuneFixer()
+			tf.Fix([]*messages.ParsedTune{
+				{
+					Tune: t,
+				},
+			})
 			g.Expect(t.Composer).To(Equal(f.wantComposer))
 		})
 	}
@@ -314,7 +326,12 @@ func Test_removeTimeSigFromTuneType(t *testing.T) {
 			t := &tune.Tune{
 				Type: f.tuneType,
 			}
-			removeTimeSigFromTuneType(t)
+			tf := NewTuneFixer()
+			tf.Fix([]*messages.ParsedTune{
+				{
+					Tune: t,
+				},
+			})
 			g.Expect(t.Type).To(Equal(f.wantTuneType))
 		})
 	}
@@ -350,7 +367,12 @@ func Test_capitalizeTuneType(t *testing.T) {
 			t := &tune.Tune{
 				Type: f.tuneType,
 			}
-			capitalizeTuneType(t)
+			tf := NewTuneFixer()
+			tf.Fix([]*messages.ParsedTune{
+				{
+					Tune: t,
+				},
+			})
 			g.Expect(t.Type).To(Equal(f.wantTuneType))
 		})
 	}
@@ -380,8 +402,8 @@ func Test_trimSpaces(t *testing.T) {
 				f.tuneTitle = " title "
 				f.tuneComposer = " composer "
 				f.tuneArranger = " arranger"
-				f.wantTuneType = "type"
-				f.wantTuneTitle = "title"
+				f.wantTuneType = "Type"
+				f.wantTuneTitle = "Title"
 				f.wantTuneComposer = "composer"
 				f.wantTuneArranger = "arranger"
 			},
@@ -401,7 +423,12 @@ func Test_trimSpaces(t *testing.T) {
 				Composer: f.tuneComposer,
 				Arranger: f.tuneArranger,
 			}
-			trimSpaces(t)
+			tf := NewTuneFixer()
+			tf.Fix([]*messages.ParsedTune{
+				{
+					Tune: t,
+				},
+			})
 			g.Expect(t.Title).To(Equal(f.wantTuneTitle))
 			g.Expect(t.Type).To(Equal(f.wantTuneType))
 			g.Expect(t.Composer).To(Equal(f.wantTuneComposer))
@@ -440,7 +467,12 @@ func Test_fixTitle(t *testing.T) {
 			t := &tune.Tune{
 				Title: f.tuneTitle,
 			}
-			fixTitle(t)
+			tf := NewTuneFixer()
+			tf.Fix([]*messages.ParsedTune{
+				{
+					Tune: t,
+				},
+			})
 			g.Expect(t.Title).To(Equal(f.wantTuneTitle))
 		})
 	}

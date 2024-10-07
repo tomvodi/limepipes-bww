@@ -76,5 +76,4 @@ var _ = Describe("StructureParser", func() {
 			Expect(bwwFile).Should(Equal(cFile))
 		})
 	})
-
 })
