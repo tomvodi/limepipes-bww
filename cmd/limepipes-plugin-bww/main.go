@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/go-plugin"
+	"github.com/spf13/afero"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/common"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/fileformat"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/grpcplugin"
@@ -32,6 +33,7 @@ func main() {
 	merger := symbolmerger.NewCollectedMerger()
 	fsconv := bww.NewConverter(symmap, merger)
 	impl := pluginimplementation.NewPluginImplementation(
+		afero.NewOsFs(),
 		parser.New(sp, fsconv),
 		helper.NewTuneFixer(),
 	)

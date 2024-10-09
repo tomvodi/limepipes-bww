@@ -3,16 +3,17 @@ package pluginimplementation
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/afero"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/fileformat"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"os"
 )
 
 type Plugin struct {
+	afs       afero.Fs
 	parser    interfaces.BwwParser
 	tuneFixer interfaces.TuneFixer
 }
@@ -43,7 +44,16 @@ func (p *Plugin) Export(
 func (p *Plugin) ParseFromFile(
 	filePath string,
 ) ([]*messages.ParsedTune, error) {
-	fileData, err := os.ReadFile(filePath)
+	stat, err := p.afs.Stat(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if stat.IsDir() {
+		return nil, fmt.Errorf("file %s is a directory", filePath)
+	}
+
+	fileData, err := afero.ReadFile(p.afs, filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -75,10 +85,12 @@ func (p *Plugin) parseTunesFromData(tunesData []byte) ([]*messages.ParsedTune, e
 }
 
 func NewPluginImplementation(
+	afs afero.Fs,
 	parser interfaces.BwwParser,
 	tuneFixer interfaces.TuneFixer,
 ) *Plugin {
 	return &Plugin{
+		afs:       afs,
 		parser:    parser,
 		tuneFixer: tuneFixer,
 	}
