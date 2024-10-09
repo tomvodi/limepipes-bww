@@ -1,0 +1,23 @@
+- title: Tune Title
+  comments:
+  - just a comment which is a tune comment before the tune
+  - and another tune comment
+  inline_texts:
+  - tune inline text
+  measures:
+  - symbols:
+    - note:
+        pitch: LowA
+        length: Quarter
+    comments:
+    - staff 1 comment
+    inline_texts:
+    - staff 1 inline text
+  - symbols:
+    - note:
+        pitch: D
+        length: Quarter
+    comments:
+    - staff 2 comment
+    inline_texts:
+    - staff 2 inline text

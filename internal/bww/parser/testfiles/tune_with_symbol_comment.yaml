@@ -1,0 +1,16 @@
+- title: Tune Title
+  measures:
+  - symbols:
+    - note:
+        pitch: LowA
+        length: Quarter
+      comments:
+      - comment symbol
+    comments:
+    - comment measure
+  - symbols:
+    - note:
+        pitch: B
+        length: Quarter
+      inline_texts:
+      - comment with inline style

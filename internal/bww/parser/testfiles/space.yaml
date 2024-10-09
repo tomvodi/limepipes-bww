@@ -1,0 +1,12 @@
+- title: Tune Title
+  tempo: 0
+  measures:
+    - symbols:
+        - note:
+            pitch: HighA
+            length: Eighth
+        - note:
+            pitch: LowA
+            length: Quarter
+      comments:
+        - undocumented feature having a space symbol

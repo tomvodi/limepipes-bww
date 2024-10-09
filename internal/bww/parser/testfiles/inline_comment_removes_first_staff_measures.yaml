@@ -1,0 +1,25 @@
+- title: inline comment removes first staff measures
+  tempo: 62
+  measures:
+  - time:
+      beats: 4
+      beat_type: 4
+    symbols:
+    - note:
+        pitch: F
+        accidental: Sharp
+    - note:
+        pitch: C
+        accidental: Sharp
+    inline_texts:
+    - "A:"
+  - symbols:
+    - note:
+        pitch: LowA
+        length: Quarter
+  - symbols:
+    - note:
+        pitch: LowA
+        length: Quarter
+    inline_texts:
+    - "B:"

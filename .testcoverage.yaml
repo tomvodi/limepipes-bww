@@ -31,6 +31,4 @@ exclude:
     - .*_enumer\.go         # exclude generated files by enumer
     - cmd/.*         # exclude test applications
     - ^internal/utils    # exclude utils
-    - internal/pluginimplementation/plugin.go # exclude plugin until after refactoring TODO: check after refactoring
-    - ^internal/common/helper    # exclude helper functions until after refactoring TODO: check after refactoring
-    - ^internal/bww/bww_grammar.go$ # will be refactored later TODO: check after refactoring
+    - ^internal/filestructure/filestructure.go    # exclude filestructure

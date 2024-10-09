@@ -1,0 +1,27 @@
+- title: Tune 1 Title
+  measures:
+  - symbols:
+    - note:
+        pitch: LowA
+        length: Quarter
+  - symbols:
+    - note:
+        pitch: D
+        length: Quarter
+    inline_texts:
+    - staff inline text
+- title: Tune 2 Title
+  measures:
+  - symbols:
+    - note:
+        pitch: B
+        length: Quarter
+    - note:
+        pitch: C
+        length: Quarter
+    - note:
+        pitch: D
+        length: Quarter
+    - note:
+        pitch: E
+        length: Quarter

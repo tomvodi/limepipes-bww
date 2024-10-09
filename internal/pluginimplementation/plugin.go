@@ -3,20 +3,19 @@ package pluginimplementation
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
-	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
+	"github.com/spf13/afero"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/fileformat"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"os"
 )
 
 type Plugin struct {
-	parser       interfaces.BwwParser
-	tuneFixer    interfaces.TuneFixer
-	fileSplitter interfaces.BwwFileByTuneSplitter
+	afs       afero.Fs
+	parser    interfaces.BwwParser
+	tuneFixer interfaces.TuneFixer
 }
 
 func (p *Plugin) PluginInfo() (*messages.PluginInfoResponse, error) {
@@ -45,7 +44,16 @@ func (p *Plugin) Export(
 func (p *Plugin) ParseFromFile(
 	filePath string,
 ) ([]*messages.ParsedTune, error) {
-	fileData, err := os.ReadFile(filePath)
+	stat, err := p.afs.Stat(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if stat.IsDir() {
+		return nil, fmt.Errorf("file %s is a directory", filePath)
+	}
+
+	fileData, err := afero.ReadFile(p.afs, filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -66,50 +74,24 @@ func (p *Plugin) Parse(
 }
 
 func (p *Plugin) parseTunesFromData(tunesData []byte) ([]*messages.ParsedTune, error) {
-	var muModel musicmodel.MusicModel
-	muModel, err := p.parser.ParseBwwData(tunesData)
+	parsedTunes, err := p.parser.ParseBwwData(tunesData)
 	if err != nil {
 		return nil, fmt.Errorf("failed parsing t data: %v", err)
 	}
 
-	log.Trace().Msgf("successfully parsed %d tunes",
-		len(muModel),
-	)
-
-	p.tuneFixer.Fix(muModel)
-
-	bwwFileTuneData, err := p.fileSplitter.SplitFileData(tunesData)
-	if err != nil {
-		msg := fmt.Sprintf("failed splitting data by tunes: %s", err.Error())
-		return nil, fmt.Errorf("%s", msg)
-	}
-
-	if len(bwwFileTuneData.TuneTitles()) != len(muModel) {
-		errMsg := fmt.Sprintf("splited bww file and music model don't have the same amount of tunes."+
-			" Music model: %d, BWW file: %d", len(muModel), len(bwwFileTuneData.TuneTitles()))
-		log.Error().Msgf("%s", errMsg)
-		return nil, fmt.Errorf("%s", errMsg)
-	}
-
-	parsedTunes := make([]*messages.ParsedTune, len(muModel))
-	for i, t := range muModel {
-		parsedTunes[i] = &messages.ParsedTune{
-			Tune:         t,
-			TuneFileData: bwwFileTuneData.Data(i),
-		}
-	}
+	p.tuneFixer.Fix(parsedTunes)
 
 	return parsedTunes, nil
 }
 
 func NewPluginImplementation(
+	afs afero.Fs,
 	parser interfaces.BwwParser,
 	tuneFixer interfaces.TuneFixer,
-	fileSplitter interfaces.BwwFileByTuneSplitter,
 ) *Plugin {
 	return &Plugin{
-		parser:       parser,
-		tuneFixer:    tuneFixer,
-		fileSplitter: fileSplitter,
+		afs:       afs,
+		parser:    parser,
+		tuneFixer: tuneFixer,
 	}
 }

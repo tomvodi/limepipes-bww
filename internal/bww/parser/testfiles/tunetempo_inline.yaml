@@ -1,0 +1,8 @@
+- title: Tune Title
+  tempo: 105
+  measures:
+    - symbols:
+        - tempo_change: 80
+        - note:
+            pitch: C
+            length: Quarter

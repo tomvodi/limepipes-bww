@@ -4,59 +4,184 @@ import (
 	"fmt"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/mock"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/helper"
 	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/measure"
-	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/musicmodel"
+	"github.com/tomvodi/limepipes-plugin-api/musicmodel/v1/tune"
+	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/fileformat"
 	"github.com/tomvodi/limepipes-plugin-api/plugin/v1/messages"
-	"github.com/tomvodi/limepipes-plugin-bww/internal/common"
 	"github.com/tomvodi/limepipes-plugin-bww/internal/interfaces/mocks"
 )
 
-var _ = Describe("Import tunes", func() {
+var _ = Describe("PluginInfo", func() {
+	var lpPlug *Plugin
+	var err error
+	var pluginInfo *messages.PluginInfoResponse
+
+	BeforeEach(func() {
+		lpPlug = &Plugin{}
+	})
+
+	JustBeforeEach(func() {
+		pluginInfo, err = lpPlug.PluginInfo()
+	})
+
+	It("should return plugin info", func() {
+		Expect(err).ShouldNot(HaveOccurred())
+		Expect(pluginInfo).Should(Equal(&messages.PluginInfoResponse{
+			Name:           "BWW Plugin",
+			Description:    "Import Bagpipe Music Writer and Bagpipe Player files.",
+			FileFormat:     fileformat.Format_BWW,
+			Type:           messages.PluginType_IN,
+			FileExtensions: []string{".bww", ".bmw"},
+		}))
+	})
+})
+
+var _ = Describe("Parse", func() {
 	var lpPlug *Plugin
 	var parser *mocks.BwwParser
 	var tuneFixer *mocks.TuneFixer
-	var fileSplitter *mocks.BwwFileByTuneSplitter
-	var testMusicModel musicmodel.MusicModel
-	var tune1FileData []byte
+	var testParsedTunes []*messages.ParsedTune
 	var tuneData []byte
+	var afs afero.Fs
 	var err error
 	var parsedTunes []*messages.ParsedTune
 
 	BeforeEach(func() {
 		parser = mocks.NewBwwParser(GinkgoT())
 		tuneFixer = mocks.NewTuneFixer(GinkgoT())
-		fileSplitter = mocks.NewBwwFileByTuneSplitter(GinkgoT())
+		afs = afero.NewMemMapFs()
 		lpPlug = &Plugin{
-			parser:       parser,
-			tuneFixer:    tuneFixer,
-			fileSplitter: fileSplitter,
+			afs:       afs,
+			parser:    parser,
+			tuneFixer: tuneFixer,
 		}
 		tuneData = []byte("tune data")
-		tune1FileData = []byte("tune 1 data")
+		testParsedTunes = []*messages.ParsedTune{
+			{
+				Tune: &tune.Tune{
+					Title: "test tune",
+					Measures: []*measure.Measure{
+						{
+							Comments: []string{"comment"},
+						},
+					},
+				},
+				TuneFileData: []byte("tune file data"),
+			},
+		}
 	})
 
-	JustBeforeEach(func() {
-		parsedTunes, err = lpPlug.Parse(tuneData)
-	})
+	Context("parsing from file", func() {
+		var filePath string
 
-	Context("parser returns an error", func() {
-		BeforeEach(func() {
-			parser.EXPECT().ParseBwwData(mock.Anything).
-				Return(nil, fmt.Errorf("failed parsing"))
+		JustBeforeEach(func() {
+			parsedTunes, err = lpPlug.ParseFromFile(filePath)
 		})
 
-		When("importing a tune data", func() {
+		When("file does not exist", func() {
+			BeforeEach(func() {
+				filePath = "test.bww"
+			})
+
 			It("should return an error", func() {
 				Expect(err).Should(HaveOccurred())
 			})
 		})
+
+		When("file exists", func() {
+			BeforeEach(func() {
+				filePath = "test.bww"
+				err = afero.WriteFile(afs, filePath, tuneData, 0644)
+				Expect(err).ShouldNot(HaveOccurred())
+			})
+
+			Context("parser returns an error", func() {
+				BeforeEach(func() {
+					parser.EXPECT().ParseBwwData(tuneData).
+						Return(nil, fmt.Errorf("failed parsing"))
+				})
+
+				When("importing a tune data", func() {
+					It("should return an error", func() {
+						Expect(err).Should(HaveOccurred())
+					})
+				})
+			})
+
+			Context("Having a tune returned by the parser", func() {
+				BeforeEach(func() {
+					parser.EXPECT().ParseBwwData(mock.Anything).
+						Return(testParsedTunes, nil)
+					tuneFixer.EXPECT().Fix(testParsedTunes)
+				})
+
+				When("successfully parsed tune data", func() {
+					It("should succeed", func() {
+						Expect(err).ShouldNot(HaveOccurred())
+						Expect(parsedTunes).Should(BeComparableTo(
+							testParsedTunes,
+							helper.MusicModelCompareOptions))
+					})
+				})
+			})
+		})
 	})
 
-	Context("Having a tune returned by the parser", func() {
+	Context("parsing from data", func() {
+		JustBeforeEach(func() {
+			parsedTunes, err = lpPlug.Parse(tuneData)
+		})
+		Context("parser returns an error", func() {
+			BeforeEach(func() {
+				parser.EXPECT().ParseBwwData(mock.Anything).
+					Return(nil, fmt.Errorf("failed parsing"))
+			})
+
+			When("importing a tune data", func() {
+				It("should return an error", func() {
+					Expect(err).Should(HaveOccurred())
+				})
+			})
+		})
+
+		Context("Having a tune returned by the parser", func() {
+			BeforeEach(func() {
+				parser.EXPECT().ParseBwwData(mock.Anything).
+					Return(testParsedTunes, nil)
+				tuneFixer.EXPECT().Fix(testParsedTunes)
+			})
+
+			When("successfully parsed tune data", func() {
+				It("should succeed", func() {
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(parsedTunes).Should(BeComparableTo(
+						testParsedTunes,
+						helper.MusicModelCompareOptions))
+				})
+			})
+		})
+	})
+})
+
+var _ = Describe("Export", func() {
+	var err error
+	var lpPlug *Plugin
+	var exportTunes []*tune.Tune
+
+	BeforeEach(func() {
+		lpPlug = &Plugin{}
+	})
+
+	JustBeforeEach(func() {
+		_, err = lpPlug.Export(exportTunes)
+	})
+
+	When("exporting a tune", func() {
 		BeforeEach(func() {
-			testMusicModel = musicmodel.MusicModel{
+			exportTunes = []*tune.Tune{
 				{
 					Title: "test tune",
 					Measures: []*measure.Measure{
@@ -66,55 +191,45 @@ var _ = Describe("Import tunes", func() {
 					},
 				},
 			}
-			parser.EXPECT().ParseBwwData(mock.Anything).
-				Return(testMusicModel, nil)
-			tuneFixer.EXPECT().Fix(testMusicModel)
 		})
 
-		When("there is an error when splitting the file by tunes", func() {
-			BeforeEach(func() {
-				fileSplitter.EXPECT().SplitFileData(tuneData).
-					Return(nil, fmt.Errorf("failed splitting"))
-			})
-
-			It("should return an error", func() {
-				Expect(err).Should(HaveOccurred())
-			})
+		It("should return an error", func() {
+			Expect(err).Should(HaveOccurred())
 		})
+	})
+})
 
-		When("there is a difference between parsed tunes and found tunes in file", func() {
-			BeforeEach(func() {
-				tuneFileData := &common.BwwFileTuneData{}
-				tuneFileData.AddTuneData("tune 1", []byte("tune 1 data"))
-				tuneFileData.AddTuneData("tune 2", []byte("tune 2 data"))
-				fileSplitter.EXPECT().SplitFileData(tuneData).
-					Return(tuneFileData, nil)
-			})
+var _ = Describe("ExportToFile", func() {
+	var err error
+	var lpPlug *Plugin
+	var exportTunes []*tune.Tune
+	var exportPath string
 
-			It("should return an error", func() {
-				Expect(err).Should(HaveOccurred())
-			})
-		})
+	BeforeEach(func() {
+		lpPlug = &Plugin{}
+	})
 
-		When("successfully parsed tune data", func() {
-			BeforeEach(func() {
-				tuneFileData := &common.BwwFileTuneData{}
-				tuneFileData.AddTuneData("tune 1", tune1FileData)
-				fileSplitter.EXPECT().SplitFileData(tuneData).
-					Return(tuneFileData, nil)
-			})
+	JustBeforeEach(func() {
+		err = lpPlug.ExportToFile(exportTunes, exportPath)
+	})
 
-			It("should succeed", func() {
-				Expect(err).ShouldNot(HaveOccurred())
-				Expect(parsedTunes).Should(BeComparableTo(
-					[]*messages.ParsedTune{
+	When("exporting a tune", func() {
+		BeforeEach(func() {
+			exportTunes = []*tune.Tune{
+				{
+					Title: "test tune",
+					Measures: []*measure.Measure{
 						{
-							Tune:         testMusicModel[0],
-							TuneFileData: tune1FileData,
+							Comments: []string{"comment"},
 						},
 					},
-					helper.MusicModelCompareOptions))
-			})
+				},
+			}
+			exportPath = "test.bww"
+		})
+
+		It("should return an error", func() {
+			Expect(err).Should(HaveOccurred())
 		})
 	})
 })
