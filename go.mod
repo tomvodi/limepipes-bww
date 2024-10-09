@@ -6,11 +6,14 @@ require (
 	github.com/alecthomas/participle/v2 v2.1.1
 	github.com/goccy/go-yaml v1.12.0
 	github.com/hashicorp/go-plugin v1.6.1
+	github.com/jinzhu/copier v0.4.0
 	github.com/onsi/ginkgo/v2 v2.20.2
 	github.com/onsi/gomega v1.34.2
 	github.com/rs/zerolog v1.33.0
+	github.com/spf13/afero v1.11.0
 	github.com/stretchr/testify v1.8.4
-	github.com/tomvodi/limepipes-plugin-api v1.0.0-alpha3
+	github.com/tomvodi/limepipes-plugin-api v1.0.0-beta1
+	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	golang.org/x/text v0.17.0
 	google.golang.org/grpc v1.65.0
 )
