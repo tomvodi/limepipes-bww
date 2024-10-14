@@ -46,8 +46,8 @@ type TuneHeader struct {
 }
 
 type Measure struct {
-	StaffComments    []StaffComment
-	StaffInlineTexts []StaffInline
+	StaffComments    []StaffComment // A comment that is placed directly above a staff
+	StaffInlineTexts []StaffInline  // Text that is placed directly above a staff
 	InlineTexts      []InlineText
 	InlineComments   []InlineComment
 	LeftBarline      Barline
